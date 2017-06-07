@@ -1,0 +1,12 @@
+{
+    "code-runner.executorMap": {
+        "cpp": "cd $dir && clang++ -std=c++14 -Wall -Wno-missing-braces -Wno-unused-variable -Wno-unused-parameter -Wextra -pthread $fileName -o  ../bin/$fileNameWithoutExt && ../bin/$fileNameWithoutExt"
+    },
+    "files.associations": {
+        "*.dat": "fortran-modern",
+        "*.in": "fortran-modern",
+        "*.m": "matlab",
+        "*.vtk": "fortran-modern",
+        "*.ipp": "cpp"
+    }
+}
