@@ -257,7 +257,7 @@ class CRTBP {
 int main() {
     double mu = 0.001;
     CRTBP system(mu);
-    double a_res = pow(0.5, 2. / 3.) + 0.01;
+    double a_res = pow(0.5, 2. / 3.);
     double e = 0.01;
 
     system.elements = {{a_res, e, 0, 0}};
