@@ -7,6 +7,17 @@
         "*.in": "fortran-modern",
         "*.m": "matlab",
         "*.vtk": "fortran-modern",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "cmath": "cpp",
+        "complex": "cpp",
+        "ostream": "cpp",
+        "iosfwd": "cpp",
+        "iomanip": "cpp",
+        "fstream": "cpp",
+        "locale": "cpp",
+        "*.tcc": "cpp",
+        "iostream": "cpp",
+        "bitset": "cpp",
+        "iterator": "cpp"
     }
 }
