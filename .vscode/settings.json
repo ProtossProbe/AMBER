@@ -18,6 +18,8 @@
         "*.tcc": "cpp",
         "iostream": "cpp",
         "bitset": "cpp",
-        "iterator": "cpp"
+        "iterator": "cpp",
+        "__locale": "cpp",
+        "functional": "cpp"
     }
 }
