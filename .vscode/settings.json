@@ -20,6 +20,19 @@
         "bitset": "cpp",
         "iterator": "cpp",
         "__locale": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "cstdlib": "cpp",
+        "valarray": "cpp",
+        "__config": "cpp",
+        "cstddef": "cpp",
+        "exception": "cpp",
+        "initializer_list": "cpp",
+        "new": "cpp",
+        "stdexcept": "cpp",
+        "typeinfo": "cpp",
+        "algorithm": "cpp",
+        "vector": "cpp",
+        "string": "cpp",
+        "ratio": "cpp"
     }
 }
