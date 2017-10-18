@@ -16,12 +16,14 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
 
 typedef boost::array<double, 2> vec2;
 typedef boost::array<double, 4> vec4;
 typedef boost::array<double, 6> vec6;
 typedef boost::array<double, 31> vec31;
 typedef boost::array<double, 61> vec61;
+typedef std::vector<std::vector<std::vector<std::vector<double>>>> arr4;
 
 const double pi = 3.1415926535897932384626433832795028841971693993751;
 

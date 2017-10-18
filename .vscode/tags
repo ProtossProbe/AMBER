@@ -1,0 +1,21 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+contour_plot	../src/plot.py	/^def contour_plot(target):$/;"	kind:function	line:36
+data1	../src/plot.py	/^data1 = np.loadtxt(target[0])$/;"	kind:variable	line:64
+data4	../src/plot.py	/^data4 = np.loadtxt(target[3])$/;"	kind:variable	line:66
+data5	../src/plot.py	/^data5 = np.loadtxt(target[4])$/;"	kind:variable	line:65
+matplotlib	../src/plot.py	/^import matplotlib$/;"	kind:namespace	line:3
+matplotlib	../src/plot.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:4
+mu	../src/plot.py	/^mu = 0.001$/;"	kind:variable	line:6
+n	../src/plot.py	/^n = 1256$/;"	kind:variable	line:79
+np	../src/plot.py	/^import numpy as np$/;"	kind:namespace	line:2
+orbit_plot	../src/plot.py	/^def orbit_plot(y, range=0.5):$/;"	kind:function	line:14
+plot.py	../src/plot.py	1;"	kind:file	line:1
+plot_primaries	../src/plot.py	/^def plot_primaries(ax):$/;"	kind:function	line:9
+plt	../src/plot.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:4
+target	../src/plot.py	/^target = ["..\/assets\/rot.txt", "..\/assets\/init.txt",$/;"	kind:variable	line:49
+target2	../src/plot.py	/^target2 = ["..\/assets\/170629\/-1.03 | 0.06.txt",$/;"	kind:variable	line:52

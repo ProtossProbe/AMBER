@@ -33,6 +33,13 @@
         "algorithm": "cpp",
         "vector": "cpp",
         "string": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "array": "cpp",
+        "queue": "cpp",
+        "chrono": "cpp",
+        "limits": "cpp",
+        "deque": "cpp",
+        "map": "cpp",
+        "ios": "cpp"
     }
 }

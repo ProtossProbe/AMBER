@@ -35,3 +35,6 @@ bin
 *.exe
 *.out
 *.app
+
+#data files
+*.dat

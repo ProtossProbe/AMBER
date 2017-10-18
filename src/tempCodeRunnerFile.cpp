@@ -1,2 +1,2 @@
-        int q = 22;
-        int l = 20;
+    func.read_newcomb();
+    func.simple_test();

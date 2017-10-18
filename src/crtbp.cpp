@@ -15,6 +15,7 @@
 #include <math.h>
 #include <sstream>
 #include <string>
+#include <vector>
 
 using namespace std;
 using namespace boost::math;
@@ -351,6 +352,8 @@ class DistFunc {
     const int N = 30;
     const int p = -1;
     const int q = 2;
+    ofstream newcombfile;
+    vector<double> newcomb_data;
 
     const vec31 ck = {
         {1.000000169188453,    -0.5000031057687094, 0.3749128690132108,
@@ -398,7 +401,7 @@ class DistFunc {
          2464.16697942,  3191.69523532,  181.441911606,  -4519.08106038,
          1878.85824712}};
 
-    double newcomb_operator(int a, int b, int c, int d) {
+    double newcomb_operator_bk(int a, int b, int c, int d) {
         double result;
         if (c < 0 or d < 0) {
             result = 0;
@@ -407,28 +410,154 @@ class DistFunc {
         } else if (c == 1 and d == 0) {
             result = b - a * 0.5;
         } else if (d == 0) {
-            result = 2 * (2 * b - a) * newcomb_operator(a, b + 1, c - 1, 0) +
-                     (b - a) * newcomb_operator(a, b + 2, c - 2, 0);
+            result = 2 * (2 * b - a) * newcomb_operator_bk(a, b + 1, c - 1, 0) +
+                     (b - a) * newcomb_operator_bk(a, b + 2, c - 2, 0);
             result /= 4 * c;
         } else {
-            result = -2 * (2 * b + a) * newcomb_operator(a, b - 1, c, d - 1) -
-                     (b + a) * newcomb_operator(a, b - 2, c, d - 2) -
-                     (c - 5 * d + 4 + 4 * b + a) *
-                         newcomb_operator(a, b, c - 1, d - 1);
+            result =
+                -2 * (2 * b + a) * newcomb_operator_bk(a, b - 1, c, d - 1) -
+                (b + a) * newcomb_operator_bk(a, b - 2, c, d - 2) -
+                (c - 5 * d + 4 + 4 * b + a) *
+                    newcomb_operator_bk(a, b, c - 1, d - 1);
             for (int j = 2; j <= min(c, d); j++) {
                 result += 2 * (c - d + b) * pow(-1, j) * binomial(1.5, j) *
-                          newcomb_operator(a, b, c - j, d - j);
+                          newcomb_operator_bk(a, b, c - j, d - j);
             }
             result /= 4 * d;
         }
         return result;
     }
 
+    double newcomb_operator(int a, int b, int c, int d) {
+        if (c < 0 or d < 0) {
+            return 0;
+        }
+        int nn = 64;
+        int nn1 = nn + 1;
+        int at = a + nn;
+        int bt = b + nn;
+        return newcomb_data[d + c * nn1 + bt * nn1 * nn1 +
+                            at * (2 * nn + 1) * nn1 * nn1];
+    }
+
+    void generate_newcomb() {
+        int n = 10;
+        // static double data[129][261][65][65];
+        static double data[21][45][11][11];
+        int at, bt;
+        double result, temp1, temp2, temp3;
+        temp1 = 0.0;
+        temp2 = 0.0;
+        temp3 = 0.0;
+        for (int a = -n; a <= n; a++) {
+            for (int b = -2 * n - 2; b <= 2 * n + 2; b++) {
+                at = a + n;
+                bt = b + 2 * n + 2;
+                data[at][bt][0][0] = 1;
+                data[at][bt][1][0] = b - a * 0.5;
+            }
+        }
+
+        for (int c = 2; c <= n; c++) {
+            for (int a = -n; a <= n; a++) {
+                for (int b = -2 * n; b <= 2 * n; b++) {
+                    at = a + n;
+                    bt = b + 2 * n + 2;
+                    data[at][bt][c][0] =
+                        2 * (2 * b - a) * data[at][bt + 1][c - 1][0] +
+                        (b - a) * data[at][bt + 2][c - 2][0];
+                    data[at][bt][c][0] /= 4 * c;
+                }
+            }
+        }
+        for (int d = 1; d <= n; d++) {
+            cout << "d: " << d << endl;
+            for (int c = 0; c <= n; c++) {
+                for (int a = -n; a <= n; a++) {
+                    for (int b = -2 * n; b <= n; b++) {
+                        at = a + n;
+                        bt = b + 2 * n + 2;
+                        temp1 = (d - 2 >= 0) ? data[at][bt - 2][c][d - 2] : 0;
+                        temp3 = (c - 1 >= 0) ? data[at][bt][c - 1][d - 1] : 0;
+                        data[at][bt][c][d] =
+                            -2 * (2 * b + a) * data[at][bt - 1][c][d - 1] -
+                            (b + a) * temp1 -
+                            (c - 5 * d + 4 + 4 * b + a) * temp3;
+                        for (int j = 2; j <= min(c, d); j++) {
+                            temp2 = (c - j >= 0 and d - j >= 0)
+                                        ? data[at][bt][c - j][d - j]
+                                        : 0;
+                            data[at][bt][c][d] += 2 * (c - d + b) * pow(-1, j) *
+                                                  binomial(1.5, j) * temp2;
+                        }
+                        data[at][bt][c][d] /= 4 * d;
+                    }
+                }
+            }
+        }
+        newcombfile.open("../assets/newcombfile_10.dat",
+                         ios::out | ios::binary);
+        for (int a = -n; a <= n; a++) {
+            for (int b = -n; b <= n; b++) {
+                for (int c = 0; c <= n; c++) {
+                    for (int d = 0; d <= n; d++) {
+                        at = a + n;
+                        bt = b + 2 * n + 2;
+                        // newcombfile << setprecision(14)
+                        //             << (char *)&data[at][bt][c][d] << endl;
+                        newcombfile.write((char *)&data[at][bt][c][d],
+                                          sizeof(double));
+                    }
+                }
+            }
+        }
+        newcombfile.close();
+    }
+
+    void read_newcomb() {
+        string line;
+        ifstream myfile;
+        myfile.open("../assets/newcombfile_64.dat", ios::in);
+        double data;
+        while (!myfile.eof()) {
+            myfile.read((char *)&data, sizeof(double));
+            newcomb_data.push_back(data);
+            if (myfile.fail()) {
+                break;
+            }
+        }
+        myfile.close();
+    }
+
+    void simple_test() {
+        int n = 10;
+        int nn = 64;
+        int nn1 = nn + 1;
+        int at, bt;
+        for (int a = -n; a <= n; a++) {
+            for (int b = -n; b <= n; b++) {
+                for (int c = 0; c <= n; c++) {
+                    for (int d = 0; d <= n; d++) {
+                        at = a + nn;
+                        bt = b + nn;
+                        cout << setprecision(12)
+                             << newcomb_operator(a, b, c, d) -
+                                    newcomb_operator_bk(a, b, c, d)
+                             << endl;
+                    }
+                }
+            }
+        }
+    }
+
     double Y_coefficient(int n, int k, int s, int j) {
         int diff = j - k;
         int u1 = max(0, diff);
         int u2 = max(0, -diff);
-        // cout << "Newcomb_Input: " << s + u1 << '\t' << s + u2 << endl;
+        // cout << "Newcomb_Input: " << s + u1 << '\t' << s + u2
+        // << endl;
+        // cout << n << '\t' << k << '\t' << s + u1 << '\t' << s + u2 << '\t'
+        //      << endl;
         return newcomb_operator(n, k, s + u1, s + u2);
     }
 
@@ -523,12 +652,10 @@ class DistFunc {
                 result *= A_coefficient(l, (i - l) / 2);
             }
         }
-        // if (l == 0) {
-        //     result -= ak[i] * m * n * I_coefficient(j, m) * I_coefficient(k,
-        //     n);
-        // }
+        if (l == 0) {
+            result -= ak[i] * m * n * I_coefficient(j, m) * I_coefficient(k, n);
+        }
         return result;
-        // }
     }
 
     double R_bar_coefficient(int i, int j, int k, int u, int l) {
@@ -637,10 +764,16 @@ class DistFunc {
                                            pow(e1, j) *
                                            cos((m - l) * sigma1 +
                                                (l - n) * sigma2);
-                                    // cout << "i: " << i << '\t' << "j: " << j
-                                    //      << '\t' << "k: " << k << '\t'
-                                    //      << "l: " << l << '\t' << "u: " << u
-                                    //      << '\t' << "R: " << result << endl;
+                                    // cout << "i: " << i <<
+                                    // '\t' << "j: "
+                                    // << j
+                                    //      << '\t' << "k: " <<
+                                    //      k << '\t'
+                                    //      << "l: " << l <<
+                                    //      '\t' << "u: "
+                                    //      << u
+                                    //      << '\t' << "R: " <<
+                                    //      result << endl;
                                 }
                             }
                         }
@@ -656,9 +789,9 @@ class DistFunc {
         double mu = 0.001;
         CRTBP system(mu, 'p');
         double a = pow(0.5, 2. / 3.);
-        a = 0.6;
-        double e1 = 0.6;
-        double f = 0;
+        // a = 1.0;
+        double e1 = 0.4;
+        double f = 0.0;
         double omega = 0;
         auto v1 = system.elements2vector({{1, 0, 0, 0}});
         auto v2 = system.elements2vector({{a, e1, f, omega}});
@@ -667,7 +800,7 @@ class DistFunc {
         double sum = 0;
         int num = 30;
 
-        for (int j = 0; j <= 7; j++) {
+        for (int j = 0; j <= 60; j++) {
             cout << j << endl;
             for (int k = 0; k <= 0; k++) {
                 for (int m = -num; m <= num; m++) {
@@ -677,14 +810,6 @@ class DistFunc {
                                 result = R_coefficient(i, j, k, m, n, l);
                                 if (abs(result) > 1e-12) {
                                     sum += result * pow(a, i) * pow(e1, j);
-
-                                    // cout << "i: " << i << '\t' << "j: "
-                                    // << j
-                                    //      << '\t' << "k: " << k << '\t'
-                                    //      << "l: " << l << '\t' << "u: "
-                                    //      << u
-                                    //      << '\t' << "R: " << result <<
-                                    //      endl;
                                 }
                             }
                         }
@@ -693,7 +818,8 @@ class DistFunc {
             }
         }
         double dist = sqrt(pow(v1[0] - v2[0], 2) + pow(v1[1] - v2[1], 2));
-        cout << "error: " << sum - 1 / dist << endl;
+        result = 1 / dist - (v1[2] * v2[2] + v1[3] * v2[3]);
+        cout << "error: " << sum - result << endl;
     }
 
     void test5() {
@@ -702,7 +828,7 @@ class DistFunc {
         CRTBP system(mu, 'p');
         double a = pow(0.5, 2. / 3.);
         a = 0.6;
-        double e1 = 0.8;
+        double e1 = 0.2;
         double f = 0.3;
         double omega = 0;
         auto v1 = system.elements2vector({{1, 0, 0, 0}});
@@ -719,7 +845,7 @@ class DistFunc {
                 co1 = 2 * pow((1 - e1 * e1) / (1 + e1 * cos(f)), q) *
                       cos(l * (f + omega));
                 co2 = 0;
-                for (int j = 0; j <= 10; j++) {
+                for (int j = 0; j <= 60; j++) {
                     for (int k = 0; k <= 0; k++) {
                         for (int m = -num; m <= num; m++) {
                             for (int n = -num; n <= num; n++) {
@@ -733,10 +859,10 @@ class DistFunc {
                     }
                 }
                 cout << q << '\t' << l << '\t' << co1 - co2 << endl;
-                // cout << "i: " << i << '\t' << "l: " << l << '\t' << "co: " <<
-                // co
+                // cout << "i: " << i << '\t' << "l: " << l <<
+                // '\t' << "co: " << co
                 //      << endl;
-                sum += co1 * pow(a, q) * A_coefficient(l, i);
+                sum += co2 * pow(a, q) * A_coefficient(l, i);
             }
         }
         double dist = sqrt(pow(v1[0] - v2[0], 2) + pow(v1[1] - v2[1], 2));
@@ -754,13 +880,13 @@ class DistFunc {
         double result, sum;
 
         int num = 30;
-        int q = 22;
-        int l = 20;
+        int q = 4;
+        int l = 1;
         for (int l = 0; l <= N; l++) {
             for (int i = 0; i <= N - l; i++) {
                 q = 2 * i + l;
                 sum = 0.;
-                for (int j = 0; j <= 5; j++) {
+                for (int j = 0; j <= 40; j++) {
                     for (int k = 0; k <= 0; k++) {
                         for (int m = -num; m <= num; m++) {
                             for (int n = -num; n <= num; n++) {
@@ -849,19 +975,16 @@ class DistFunc {
         cout << "result: "
              << sum - 1 * (sqrt(1 / a1) * sqrt((1 + e1) / (1 - e1))) << endl;
     }
-}
-
-;
+};
 
 int main() {
     double mu = 0.001;
     CRTBP system(mu, 'p');
     double a_res = pow(0.5, 2. / 3.);
-    system.print_vec(system.elements2vector({{1, 0, 0, 0}}));
-    system.print_vec(system.elements2vector({{a_res, 0.2, 0, 0}}));
-    // a_res = 1.0167;
-    // double e = 0.0;
-    // for (double e = 0.0; e < 0.8; e += 0.01) {
+    // system.print_vec(system.elements2vector({{1, 0, 0, 0}}));
+    // system.print_vec(system.elements2vector({{a_res, 0.2, 0,
+    // 0}})); a_res = 1.0167; double e = 0.0; for (double e =
+    // 0.0; e < 0.8; e += 0.01) {
     //     cout << system.average(a_res, e, 2) << ", ";
     // }
 
@@ -883,11 +1006,15 @@ int main() {
     //         endl;
     //     }
     // }
-
-    func.test6();
+    // func.generate_newcomb();
+    func.read_newcomb();
+    // func.simple_test();
+    func.test4();
     // double e = 0.1;
     // system.elements = {{a_res + 0.01, e, 0.0, 0}};
     // system.cal_init_vec();
     // cout << system.F1_func(system.vector, 0) << endl;
     // cout << "DONE!" << endl;
 }
+
+;
