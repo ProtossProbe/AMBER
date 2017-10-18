@@ -11,6 +11,7 @@ bin
 *.slo
 *.lo
 *.o
+*.dSYM
 
 # Precompiled Headers
 *.gch

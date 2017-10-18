@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "tasks": [{
+            "taskName": "compile",
+            "type": "shell",
+            "command": "clang++",
+            "args": [
+                "-g", "-std=c++14 -Wall -Wno-missing-braces -Wno-unused-variable -Wno-unused-parameter -Wno-unused-local-typedefs -pthread src/main.cpp src/crtbp.cpp src/pcrtbp.cpp -o main"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always", // 设置是否在“终端”中显示编译信息，可以为always，silent，never。一些错误提示也在这里，但是因为有静态检测，我就设为silent了。
+                "focus": false,
+                "panel": "shared" // 不同的文件的编译信息共享一个终端面板
+            }
+        },
+        {
+            "taskName": "run",
+            "command": "./main",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+}

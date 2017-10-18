@@ -12,18 +12,16 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <string>
 #include <sstream>
+#include <string>
 
 using namespace std;
 using namespace boost::math;
 using namespace boost::numeric::odeint;
 
-int main()
-{
-    ofstream outputfile;
-    outputfile.open("../assets/output.txt");
-    state_type4 x = {{1, 2, 3, 4}};
-    outputfile << setprecision(12) << x[0] << '\t' << x[1] << endl;
-    outputfile.close();
+int main() {
+    double mu = 0.001;
+    pcrtbp system(mu, 'p');
+    double a_res = pow(0.5, 2. / 3.);
+    system.print_vec(system.elements2vector({{1, 0, 0, 0}}));
 }
