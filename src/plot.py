@@ -46,38 +46,38 @@ def contour_plot(target):
     plt.show()
 
 
-target = ["../assets/rot.txt", "../assets/init.txt",
-          "../assets/elements.txt", "../assets/key.txt", "../assets/key3.txt"]
+# target = ["../assets/rot.txt", "../assets/init.txt",
+#           "../assets/elements.txt", "../assets/key.txt", "../assets/key3.txt"]
 
-target2 = ["../assets/170629/-1.03 | 0.06.txt",
-           "../assets/170629/-1.03 | 0.06-.txt",
-           "../assets/170629/-1.03 | 0.15.txt",
-           "../assets/170629/-1.03 | 0.15-.txt",
-           "../assets/170629/-1.03 | 0.2.txt",
-           "../assets/170629/-1.03 | 0.03-.txt",
-           "../assets/170629/-1.03 | 0.1-.txt",
-           "../assets/170629/-1.03 | 0.08.txt",
-           "../assets/170629/-1.03 | 0.055.txt"]
+target = ["assets/out.txt"]
 
-contour_plot(target2)
+# target2 = ["../assets/170629/-1.03 | 0.06.txt",
+#            "../assets/170629/-1.03 | 0.06-.txt",
+#            "../assets/170629/-1.03 | 0.15.txt",
+#            "../assets/170629/-1.03 | 0.15-.txt",
+#            "../assets/170629/-1.03 | 0.2.txt",
+#            "../assets/170629/-1.03 | 0.03-.txt",
+#            "../assets/170629/-1.03 | 0.1-.txt",
+#            "../assets/170629/-1.03 | 0.08.txt",
+#            "../assets/170629/-1.03 | 0.055.txt"]
+
 
 data1 = np.loadtxt(target[0])
-data5 = np.loadtxt(target[4])
-data4 = np.loadtxt(target[3])
 # plt.plot(data2[:, 0], data2[:, 1])
 # plt.show()
 # data1 = np.loadtxt(target[2])
 # plt.plot(data1[:1000, 1], data1[:1000, 2])
 fig1, ax1 = plt.subplots()
-fig2, ax2 = plt.subplots()
-fig3, ax3 = plt.subplots()
+fig2, [ax3, ax4] = plt.subplots(2, sharex=True)
+
 ax1.set_xlim(-1.5, 1.5)
 ax1.set_ylim(-1.5, 1.5)
-ax3.set_xlim(-0.5, 0.5)
-ax3.set_ylim(-0.5, 0.5)
+
 # for file in target:
-n = 1256
 ax1.plot(data1[:, 1], data1[:, 2], linewidth=0.1)
+
+ax3.plot(data1[:, 0], data1[:, 5])
+ax4.plot(data1[:, 0], data1[:, 6])
 # ax1.plot(data1[:n, 1], data1[:n, 2], 'r', linewidth=2)
 # plot_primaries(ax1)
 # ax2.plot(data2[:, 1], data2[:, 2], linewidth=0.5)
@@ -97,9 +97,9 @@ ax1.plot(data1[:, 1], data1[:, 2], linewidth=0.1)
 # ax1.scatter(data1[:, 4] * 180 / np.pi, data1[:, 1], s=0.5)
 # ax2.scatter(data2[:, 2] * np.cos(data2[:, 3]),
 #             data2[:, 2] * np.sin(data2[:, 3]), s=0.5)
-# ax1.grid(linestyle='dashed')
-# ax2.grid(linestyle='dashed')
+ax1.grid(linestyle='dashed')
 ax3.grid(linestyle='dashed')
+ax4.grid(linestyle='dashed')
 # plt.show()
 
 # data3 = np.loadtxt(target[3])

@@ -5,7 +5,7 @@
             "type": "shell",
             "command": "clang++",
             "args": [
-                "-g", "-std=c++14 -Wall -Wno-missing-braces -Wno-unused-variable -Wno-unused-parameter -Wno-unused-local-typedefs -pthread src/main.cpp src/crtbp.cpp src/pcrtbp.cpp -o main"
+                "-g", "-std=c++1z -Wall -Wno-missing-braces -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-unused-local-typedefs -pthread src/main.cpp src/crtbp.cpp -o main"
             ],
             "group": {
                 "kind": "build",
@@ -25,4 +25,6 @@
                 "kind": "test",
                 "isDefault": true
             }
+        }
+    ]
 }

@@ -20,8 +20,10 @@ using namespace boost::math;
 using namespace boost::numeric::odeint;
 
 int main() {
-    double mu = 0.001;
-    pcrtbp system(mu, 'p');
-    double a_res = pow(0.5, 2. / 3.);
-    system.print_vec(system.elements2vector({{1, 0, 0, 0}}));
+    // output.open("assets/rot.txt");
+    crtbp system;
+    orbit3d orbit;
+    orbit.setState({{1.5, 0, 0, 0, -0.8835, 0.01}});
+    system.inteSingle(orbit, 1000, 0.01);
+    // output.close();
 }

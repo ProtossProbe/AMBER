@@ -1,6 +1,6 @@
 {
     "code-runner.executorMap": {
-        "cpp": "cd $dir && clang++ -std=c++14 -Wall -Wno-missing-braces -Wno-unused-variable -Wno-unused-parameter -Wno-unused-local-typedefs -pthread $fileName crtbp.cpp pcrtbp.cpp -o ../bin/$fileNameWithoutExt && ../bin/$fileNameWithoutExt"
+        "cpp": "cd $dir && clang++ -std=c++1z -Wall -Wno-missing-braces -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-unused-local-typedefs -pthread $fileName crtbp.cpp -o ../bin/$fileNameWithoutExt && ../bin/$fileNameWithoutExt"
     },
     "files.associations": {
         "*.backup": "plaintext",
