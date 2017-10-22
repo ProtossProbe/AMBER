@@ -3,7 +3,7 @@
 //
 //
 //  Created by Protoss Probe on 2017/06/07.
-//  Copyright © 2016-2017年 probe. All rights reserved.
+//  Copyright © 2016-2017年 probe. All rights reseouted.
 //
 
 #include "crtbp.hpp"
@@ -30,8 +30,10 @@ void crtbp::crtbp_ode_variation::operator()(const vec12 &x, vec12 &dxdt,
     vec6 x1 = {{x[0], x[1], x[2], x[3], x[4], x[5]}};
     vec6 x2 = {{x[6], x[7], x[8], x[9], x[10], x[11]}};
     vec6 dxdt1, dxdt2;
+
     crtbp::eqOfMotion(x1, dxdt1);
     crtbp::eqOfVariation(x2, dxdt2, x1);
+
     dxdt = joinVector6(dxdt1, dxdt2);
 };
 
@@ -78,14 +80,33 @@ double crtbp::jacobiConstant(const vec6 &x) {
            2 * mu / r2;
 }
 
-void crtbp::inteSingle(orbit3d &orbit, double endtime, double dt) {
+void crtbp::inteSingle(orbit3d &orbit, double endtime, size_t jump) {
     runge_kutta_dopri5<vec12> stepper;
-    orbit.dt = dt;
+    orbit.setOutputFile();
+    cout << "Start: " << orbit.getName() << endl;
+    size_t steps = 0;
     while (orbit.time <= endtime) {
         orbit.updateMEGNO();
-        writeInteData(orbit);
+        if (steps % jump == 0) {
+            writeInteData(orbit);
+        }
+
         stepper.do_step(crtbp_ode_variation(), orbit.vec, 0.0, orbit.dt);
         orbit.time += orbit.dt;
+        steps++;
+    }
+    orbit.closeOutputFile();
+    cout << "End: " << orbit.getName() << endl;
+    cout << endl;
+}
+
+void crtbp::inteNbody(orbit3d orbits[], size_t n, double endtime, size_t jump) {
+#pragma omp parallel num_threads(4)
+    {
+#pragma omp for
+        for (size_t i = 0; i < n; i++) {
+            crtbp::inteSingle(orbits[i], endtime, jump);
+        }
     }
 }
 
@@ -123,6 +144,52 @@ vec6 crtbp::uxxMatrix(const vec3 &x) {
     return {{uxx, uxy, uxz, uyy, uyz, uzz}};
 }
 
+vec6 crtbp::elementsToState(const vec6 &in) {
+    // input: {{a,e,I,g,n,f}}
+    // output:: {{x,y,z,u,v,w}} (inerital)
+    // a = semi-major axis (in AU)
+    // e = eccentricity
+    // I = inclination (degrees)
+    // g = argument of pericentre (degrees)
+    // n = longitude of the ascending node (degrees)
+    // f = true anomaly (degrees)
+    double a = in[0], e = in[1], I = in[2] * pi180, g = in[3] * pi180,
+           n = in[4] * pi180, f = in[5] * pi180;
+    vec6 out;
+    double p = a * fabs(1.0 - e * e); //???
+
+    double sini, cosi, sing, cosg, sinn, cosn;
+    sini = sin(I);
+    cosi = cos(I);
+    sing = sin(n);
+    cosg = cos(n);
+    sinn = sin(g);
+    cosn = cos(g);
+
+    //??????????,????????
+    vec3 HVector = {{sini * sing, -sini * cosg, cosi}};
+
+    //???????,??Laplace??
+    vec3 PVector = {{cosg * cosn - sing * sinn * cosi,
+                     sing * cosn + cosg * sinn * cosi, sinn * sini}};
+
+    //?????????,PVector,QVector,HVector???????
+    // QVector=[-cosg*sinn-sing*cosn*cosi;-sing*sinn+cosg*cosn*cosi;cosn*sini];
+    vec3 QVector = vec3Cross(HVector, PVector);
+    double r = 0.0;
+    r = p / (1.0 + e * cos(f));
+    for (int i = 0; i < 3; i++) {
+        out[i] = r * (cos(f) * PVector[i] + sin(f) * QVector[i]);
+        out[3 + i] =
+            sqrt(1 / p) * (-sin(f) * PVector[i] + (cos(f) + e) * QVector[i]);
+    }
+    return out;
+}
+double crtbp::true2mean(double theta, double e) {
+    double E = 2 * atan(sqrt((1 - e) / (1 + e)) * tan(theta / 2));
+    return E - e * sin(E);
+}
+
 const double orbit3d::getJacobi() {
     return crtbp::jacobiConstant(orbit3d::getState());
 }
@@ -148,11 +215,14 @@ void orbit3d::updateMEGNO() {
     vec2 delta = orbit3d::deltaNormCal();
     double incr = delta[1] / delta[0] * dt * time;
     megno_temp += incr;
+    steps++;
 }
 
 double orbit3d::getMEGNO() {
-    if (time > 0) {
-        megno = megno_temp / time * 2;
+    if (time > 0 and steps > 0) {
+        megno_fast = megno_temp / time * 2;
+        megno_sum += megno_fast;
+        megno = megno_sum / steps;
         return megno;
     }
     return 0.0;

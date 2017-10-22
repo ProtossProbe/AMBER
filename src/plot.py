@@ -49,7 +49,7 @@ def contour_plot(target):
 # target = ["../assets/rot.txt", "../assets/init.txt",
 #           "../assets/elements.txt", "../assets/key.txt", "../assets/key3.txt"]
 
-target = ["assets/out.txt"]
+target = ["assets/Ast_2.txt"]
 
 # target2 = ["../assets/170629/-1.03 | 0.06.txt",
 #            "../assets/170629/-1.03 | 0.06-.txt",

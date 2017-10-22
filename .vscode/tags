@@ -13,81 +13,85 @@ L3_e	../src/crtbp.py	/^L3_e = -1.00000101196$/;"	kind:variable	line:21
 L3_m	../src/crtbp.py	/^L3_m = -1.00506268026$/;"	kind:variable	line:18
 LEO	../src/crtbp.py	/^LEO = 167$/;"	kind:variable	line:24
 LLO	../src/crtbp.py	/^LLO = 150$/;"	kind:variable	line:25
-R_matrix	../src/crtbp.py	/^def R_matrix(t, theta0=0.):$/;"	kind:function	line:900
+R_matrix	../src/crtbp.py	/^def R_matrix(t, theta0=0.):$/;"	kind:function	line:901
 Radius_e	../src/crtbp.py	/^Radius_e = 6371$/;"	kind:variable	line:22
 Radius_m	../src/crtbp.py	/^Radius_m = 1737.4$/;"	kind:variable	line:23
-a_transform	../src/crtbp.py	/^def a_transform(A):$/;"	kind:function	line:174
-bcmfunc_em	../src/crtbp.py	/^def bcmfunc_em(y, t, theta_S0=0.):$/;"	kind:function	line:975
-bcmfunc_se	../src/crtbp.py	/^def bcmfunc_se(y, t, theta_M0=0.):$/;"	kind:function	line:1007
-bcmfunc_se_tran	../src/crtbp.py	/^def bcmfunc_se_tran(t, y, theta_M0=0.):$/;"	kind:function	line:1038
-cal_acc	../src/crtbp.py	/^def cal_acc(y,model='crtbp',mu=mu_m):$/;"	kind:function	line:377
-cal_eigenvector	../src/crtbp.py	/^def cal_eigenvector(mono):$/;"	kind:function	line:548
+a	../src/crtbp.py	/^a = generate_amatrix(1, 1, 1, 0.001)$/;"	kind:variable	line:1177
+a_transform	../src/crtbp.py	/^def a_transform(A):$/;"	kind:function	line:175
+b	../src/crtbp.py	/^b = np.array([div,div,div,div,div,div])$/;"	kind:variable	line:1179
+bcmfunc_em	../src/crtbp.py	/^def bcmfunc_em(y, t, theta_S0=0.):$/;"	kind:function	line:976
+bcmfunc_se	../src/crtbp.py	/^def bcmfunc_se(y, t, theta_M0=0.):$/;"	kind:function	line:1008
+bcmfunc_se_tran	../src/crtbp.py	/^def bcmfunc_se_tran(t, y, theta_M0=0.):$/;"	kind:function	line:1039
+c	../src/crtbp.py	/^c = np.dot(a,b)$/;"	kind:variable	line:1180
+cal_acc	../src/crtbp.py	/^def cal_acc(y,model='crtbp',mu=mu_m):$/;"	kind:function	line:378
+cal_eigenvector	../src/crtbp.py	/^def cal_eigenvector(mono):$/;"	kind:function	line:549
 contour_plot	../src/plot.py	/^def contour_plot(target):$/;"	kind:function	line:36
-cross_section	../src/crtbp.py	/^def cross_section(y_now, y_next, cut, theta=np.pi\/2, option='section'):$/;"	kind:function	line:684
+cross_section	../src/crtbp.py	/^def cross_section(y_now, y_next, cut, theta=np.pi\/2, option='section'):$/;"	kind:function	line:685
 crtbp.py	../src/crtbp.py	1;"	kind:file	line:1
-crtbpfunc	../src/crtbp.py	/^def crtbpfunc(y, t, mu=mu_m):$/;"	kind:function	line:127
-crtbpfunc42	../src/crtbp.py	/^def crtbpfunc42(y, t, mu=mu_m):$/;"	kind:function	line:187
-crtbpfunc42_tran	../src/crtbp.py	/^def crtbpfunc42_tran(t, y, mu=mu_m):$/;"	kind:function	line:197
-crtbpfunc_lin	../src/crtbp.py	/^def crtbpfunc_lin(y, t, mu=mu_m):$/;"	kind:function	line:147
-crtbpfunc_tran	../src/crtbp.py	/^def crtbpfunc_tran(t, y, mu=mu_m):$/;"	kind:function	line:155
+crtbpfunc	../src/crtbp.py	/^def crtbpfunc(y, t, mu=mu_m):$/;"	kind:function	line:128
+crtbpfunc42	../src/crtbp.py	/^def crtbpfunc42(y, t, mu=mu_m):$/;"	kind:function	line:188
+crtbpfunc42_tran	../src/crtbp.py	/^def crtbpfunc42_tran(t, y, mu=mu_m):$/;"	kind:function	line:198
+crtbpfunc_lin	../src/crtbp.py	/^def crtbpfunc_lin(y, t, mu=mu_m):$/;"	kind:function	line:148
+crtbpfunc_tran	../src/crtbp.py	/^def crtbpfunc_tran(t, y, mu=mu_m):$/;"	kind:function	line:156
 data1	../src/plot.py	/^data1 = np.loadtxt(target[0])$/;"	kind:variable	line:65
 data_dir	../src/crtbp.py	/^data_dir = 'data\/'$/;"	kind:variable	line:36
-diff_correct	../src/crtbp.py	/^def diff_correct(y0, y, phi, option="fix_x", mu=mu_m):$/;"	kind:function	line:391
-dist2target	../src/crtbp.py	/^def dist2target(y, target='earth',model='se'):$/;"	kind:function	line:1116
-em2se	../src/crtbp.py	/^def em2se(y_temp, t_temp, theta0=0.):$/;"	kind:function	line:952
-find_init_with_same_jacobi	../src/crtbp.py	/^def find_init_with_same_jacobi(jacobi, mu=mu_m):$/;"	kind:function	line:790
+diff_correct	../src/crtbp.py	/^def diff_correct(y0, y, phi, option="fix_x", mu=mu_m):$/;"	kind:function	line:392
+dist2target	../src/crtbp.py	/^def dist2target(y, target='earth',model='se'):$/;"	kind:function	line:1117
+div	../src/crtbp.py	/^div = 1e-8$/;"	kind:variable	line:1178
+em2se	../src/crtbp.py	/^def em2se(y_temp, t_temp, theta0=0.):$/;"	kind:function	line:953
+find_init_with_same_jacobi	../src/crtbp.py	/^def find_init_with_same_jacobi(jacobi, mu=mu_m):$/;"	kind:function	line:791
 fname	../src/crtbp.py	/^    fname='\/Users\/huangyukun\/Library\/Fonts\/SourceHanSansCN-Regular.otf')$/;"	kind:variable	line:35
-frame_trans	../src/crtbp.py	/^def frame_trans(y_temp, t, fix_p=-mu_m, theta=0.,option='rota2init'):$/;"	kind:function	line:914
-generate_amatrix	../src/crtbp.py	/^def generate_amatrix(x, y, z, mu=mu_m):$/;"	kind:function	line:38
-generate_amatrix_bcm_em	../src/crtbp.py	/^def generate_amatrix_bcm_em(x, y, z, mu=mu_m, t=0., theta_S0=0.):$/;"	kind:function	line:1070
-generate_mmatrix	../src/crtbp.py	/^def generate_mmatrix(y_aft_minus,y_aft_plus,Phi,mu=mu_m):$/;"	kind:function	line:520
+frame_trans	../src/crtbp.py	/^def frame_trans(y_temp, t, fix_p=-mu_m, theta=0.,option='rota2init'):$/;"	kind:function	line:915
+generate_amatrix	../src/crtbp.py	/^def generate_amatrix(x, y, z, mu=mu_m):$/;"	kind:function	line:39
+generate_amatrix_bcm_em	../src/crtbp.py	/^def generate_amatrix_bcm_em(x, y, z, mu=mu_m, t=0., theta_S0=0.):$/;"	kind:function	line:1071
+generate_mmatrix	../src/crtbp.py	/^def generate_mmatrix(y_aft_minus,y_aft_plus,Phi,mu=mu_m):$/;"	kind:function	line:521
 interp1d	../src/crtbp.py	/^from scipy.interpolate import interp1d$/;"	kind:namespace	line:12
-jacobi_error	../src/crtbp.py	/^def jacobi_error(y, mu=mu_m, plot=False):$/;"	kind:function	line:207
-jacobi_inte	../src/crtbp.py	/^def jacobi_inte(y, mu=mu_m,option="normal"):$/;"	kind:function	line:70
-jacobi_xdot	../src/crtbp.py	/^def jacobi_xdot(y, jacobi, option='positive', mu=mu_m):$/;"	kind:function	line:852
-mani_jacobi	../src/crtbp.py	/^def mani_jacobi(manifolds, mu=mu_m):$/;"	kind:function	line:82
-manifolds_gene	../src/crtbp.py	/^                    mu=mu_m, target='moon', crosstime=1, angle=np.pi\/2):$/;"	kind:function	line:611
-manifolds_init	../src/crtbp.py	/^def manifolds_init(y, phi, v, Period, target='moon', numberofstep=100):$/;"	kind:function	line:565
+jacobi_error	../src/crtbp.py	/^def jacobi_error(y, mu=mu_m, plot=False):$/;"	kind:function	line:208
+jacobi_inte	../src/crtbp.py	/^def jacobi_inte(y, mu=mu_m,option="normal"):$/;"	kind:function	line:71
+jacobi_xdot	../src/crtbp.py	/^def jacobi_xdot(y, jacobi, option='positive', mu=mu_m):$/;"	kind:function	line:853
+mani_jacobi	../src/crtbp.py	/^def mani_jacobi(manifolds, mu=mu_m):$/;"	kind:function	line:83
+manifolds_gene	../src/crtbp.py	/^                    mu=mu_m, target='moon', crosstime=1, angle=np.pi\/2):$/;"	kind:function	line:612
+manifolds_init	../src/crtbp.py	/^def manifolds_init(y, phi, v, Period, target='moon', numberofstep=100):$/;"	kind:function	line:566
 matplotlib	../src/crtbp.py	/^import matplotlib$/;"	kind:namespace	line:8
 matplotlib	../src/crtbp.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:9
 matplotlib	../src/plot.py	/^import matplotlib$/;"	kind:namespace	line:3
 matplotlib	../src/plot.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:4
-mmatrix	../src/crtbp.py	/^def mmatrix(y_minus,y_plus,phi_0,phi_1,mu=mu_m):$/;"	kind:function	line:500
+mmatrix	../src/crtbp.py	/^def mmatrix(y_minus,y_plus,phi_0,phi_1,mu=mu_m):$/;"	kind:function	line:501
 mu	../src/plot.py	/^mu = 0.001$/;"	kind:variable	line:6
 mu_e	../src/crtbp.py	/^mu_e = 0.0000030359$/;"	kind:variable	line:15
 mu_m	../src/crtbp.py	/^mu_m = 0.0121506683$/;"	kind:variable	line:14
-multi_shooting_step_1	../src/crtbp.py	/^def multi_shooting_step_1(y_p, y, phi, option="normal", mu=mu_m):$/;"	kind:function	line:467
-multi_shooting_step_2	../src/crtbp.py	/^def multi_shooting_step_2(y_aft_minus,y_aft_plus,Phi,mu=mu_m,):$/;"	kind:function	line:533
+multi_shooting_step_1	../src/crtbp.py	/^def multi_shooting_step_1(y_p, y, phi, option="normal", mu=mu_m):$/;"	kind:function	line:468
+multi_shooting_step_2	../src/crtbp.py	/^def multi_shooting_step_2(y_aft_minus,y_aft_plus,Phi,mu=mu_m,):$/;"	kind:function	line:534
 np	../src/crtbp.py	/^import numpy as np$/;"	kind:namespace	line:7
 np	../src/plot.py	/^import numpy as np$/;"	kind:namespace	line:2
 ode	../src/crtbp.py	/^from scipy.integrate import odeint, ode$/;"	kind:namespace	line:11
 odeint	../src/crtbp.py	/^from scipy.integrate import odeint, ode$/;"	kind:namespace	line:11
-odeint42	../src/crtbp.py	/^def odeint42(y0, dt, acc=1e-12, target='moon', option='half',t_end=10):$/;"	kind:function	line:298
-orbit_intepolate	../src/crtbp.py	/^def orbit_intepolate(query, orbit = 'L1_p', option = 'find_y', mu=mu_m):$/;"	kind:function	line:748
-orbit_plot	../src/crtbp.py	/^def orbit_plot(y, range=0.5, target='moon', option='2d'):$/;"	kind:function	line:230
+odeint42	../src/crtbp.py	/^def odeint42(y0, dt, acc=1e-12, target='moon', option='half',t_end=10):$/;"	kind:function	line:299
+orbit_intepolate	../src/crtbp.py	/^def orbit_intepolate(query, orbit = 'L1_p', option = 'find_y', mu=mu_m):$/;"	kind:function	line:749
+orbit_plot	../src/crtbp.py	/^def orbit_plot(y, range=0.5, target='moon', option='2d'):$/;"	kind:function	line:231
 orbit_plot	../src/plot.py	/^def orbit_plot(y, range=0.5):$/;"	kind:function	line:14
-phi_slice	../src/crtbp.py	/^def phi_slice(phi):$/;"	kind:function	line:493
+phi_slice	../src/crtbp.py	/^def phi_slice(phi):$/;"	kind:function	line:494
 plot.py	../src/plot.py	1;"	kind:file	line:1
-plot_jacobi_range	../src/crtbp.py	/^def plot_jacobi_range(C, delta, mu=mu_m):$/;"	kind:function	line:91
-plot_poincare_cross	../src/crtbp.py	/^def plot_poincare_cross(y_section_u, y_section_s, plot_range, option='2d'):$/;"	kind:function	line:800
-plot_primaries	../src/crtbp.py	/^def plot_primaries(ax, option='em2d'):$/;"	kind:function	line:1151
+plot_jacobi_range	../src/crtbp.py	/^def plot_jacobi_range(C, delta, mu=mu_m):$/;"	kind:function	line:92
+plot_poincare_cross	../src/crtbp.py	/^def plot_poincare_cross(y_section_u, y_section_s, plot_range, option='2d'):$/;"	kind:function	line:801
+plot_primaries	../src/crtbp.py	/^def plot_primaries(ax, option='em2d'):$/;"	kind:function	line:1152
 plot_primaries	../src/plot.py	/^def plot_primaries(ax):$/;"	kind:function	line:9
 plt	../src/crtbp.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:9
 plt	../src/plot.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:4
-poincare_section	../src/crtbp.py	/^def poincare_section(manifolds, x_cut=0, plot=True):$/;"	kind:function	line:724
-primary_trans	../src/crtbp.py	/^def primary_trans(y_temp, t_temp, option='m2e'):$/;"	kind:function	line:932
+poincare_section	../src/crtbp.py	/^def poincare_section(manifolds, x_cut=0, plot=True):$/;"	kind:function	line:725
+primary_trans	../src/crtbp.py	/^def primary_trans(y_temp, t_temp, option='m2e'):$/;"	kind:function	line:933
 progressbar	../src/crtbp.py	/^import progressbar$/;"	kind:namespace	line:6
-save_orbit_data	../src/crtbp.py	/^def save_orbit_data(filename, y0): $/;"	kind:function	line:290
-se2em	../src/crtbp.py	/^def se2em(y_temp, t_temp, theta0=0.):$/;"	kind:function	line:963
-section_delete	../src/crtbp.py	/^def section_delete(y_section, option='moon'):$/;"	kind:function	line:866
+save_orbit_data	../src/crtbp.py	/^def save_orbit_data(filename, y0):$/;"	kind:function	line:291
+se2em	../src/crtbp.py	/^def se2em(y_temp, t_temp, theta0=0.):$/;"	kind:function	line:964
+section_delete	../src/crtbp.py	/^def section_delete(y_section, option='moon'):$/;"	kind:function	line:867
 t_factor_e	../src/crtbp.py	/^t_factor_e = 3.15581184e7\/(2*np.pi)$/;"	kind:variable	line:31
 t_factor_m	../src/crtbp.py	/^t_factor_m = 2.36059488e6\/(2*np.pi)$/;"	kind:variable	line:30
-target	../src/plot.py	/^target = ["assets\/out.txt"]$/;"	kind:variable	line:52
-two_body_energy	../src/crtbp.py	/^def two_body_energy(y, mu=mu_m):$/;"	kind:function	line:1167
-unit_trans	../src/crtbp.py	/^def unit_trans(l, v, t, target='moon', option='dimension'):$/;"	kind:function	line:878
+target	../src/plot.py	/^target = ["assets\/Ast_2.txt"]$/;"	kind:variable	line:52
+two_body_energy	../src/crtbp.py	/^def two_body_energy(y, mu=mu_m):$/;"	kind:function	line:1168
+unit_trans	../src/crtbp.py	/^def unit_trans(l, v, t, target='moon', option='dimension'):$/;"	kind:function	line:879
 v_LEO	../src/crtbp.py	/^v_LEO = 7.805$/;"	kind:variable	line:26
 v_LLO	../src/crtbp.py	/^v_LLO = 1.612$/;"	kind:variable	line:27
 v_factor_e	../src/crtbp.py	/^v_factor_e = 29.784$/;"	kind:variable	line:29
 v_factor_m	../src/crtbp.py	/^v_factor_m = 1.023$/;"	kind:variable	line:28
-xy2r	../src/crtbp.py	/^def xy2r(y, target='earth',model='se'):$/;"	kind:function	line:1128
+xy2r	../src/crtbp.py	/^def xy2r(y, target='earth',model='se'):$/;"	kind:function	line:1129
 zhfont	../src/crtbp.py	/^zhfont = matplotlib.font_manager.FontProperties($/;"	kind:variable	line:34

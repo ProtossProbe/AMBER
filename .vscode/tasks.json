@@ -3,9 +3,9 @@
     "tasks": [{
             "taskName": "compile",
             "type": "shell",
-            "command": "clang++",
+            "command": "clang-omp++",
             "args": [
-                "-g", "-std=c++1z -Wall -Wno-missing-braces -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -Wno-unused-local-typedefs -pthread src/main.cpp src/crtbp.cpp -o main"
+                "-g", "-fopenmp -std=c++1z -Wall -Wno-missing-braces -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -pthread src/main.cpp src/crtbp.cpp -o main"
             ],
             "group": {
                 "kind": "build",
@@ -21,7 +21,7 @@
         {
             "taskName": "run",
             "command": "./main",
-            "args": ["assets/input.txt"],
+            "args": ["assets/input.txt", "assets/info.txt"],
             "group": {
                 "kind": "test",
                 "isDefault": true

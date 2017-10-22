@@ -13,16 +13,17 @@
 #include <boost/array.hpp>
 #include <boost/foreach.hpp>
 #include <boost/numeric/odeint.hpp>
-#include <cmath>
 #include <fstream>
 #include <iostream>
+#include <libiomp/omp.h>
 #include <math.h>
-#include <sstream>
 #include <string>
 #include <vector>
 
 const double pi = M_PI;
+const double pi180 = pi / 180;
 const double mu = 0.001;
+const size_t MAX_NUMBER = 200;
 typedef boost::array<double, 2> vec2;
 typedef boost::array<double, 3> vec3;
 typedef boost::array<double, 4> vec4;
@@ -56,6 +57,14 @@ static double vec6Dot(const vec6 &v1, const vec6 &v2) {
     return result;
 }
 
+static vec3 vec3Cross(const vec3 &v1, const vec3 &v2) {
+    vec3 v3;
+    v3[0] = v1[1] * v2[2] - v1[2] * v2[1];
+    v3[1] = v1[2] * v2[0] - v1[0] * v2[2];
+    v3[2] = v1[0] * v2[1] - v1[1] * v2[0];
+    return v3;
+}
+
 static std::vector<vec6> readInputFromTxt(const std::string &inputstring) {
     std::ifstream inputfile;
     inputfile.open(inputstring);
@@ -72,19 +81,35 @@ static std::vector<vec6> readInputFromTxt(const std::string &inputstring) {
     return inputmatrix;
 }
 
+static vec3 readInfoFromTxt(const std::string &infostring) {
+    std::ifstream infofile;
+    infofile.open(infostring);
+    vec3 infoarray;
+    if (infofile.is_open()) {
+        while (!infofile.eof()) {
+            for (size_t i = 0; i < infoarray.size(); i++) {
+                infofile >> infoarray[i];
+            }
+        }
+    }
+    return infoarray;
+}
+
 class orbit3d {
   private:
     double div = 1e-8;
     double megno_temp = 0;
+    double megno_fast = 0;
+    double megno_sum = 0;
+    size_t steps = 0;
 
   public:
-    orbit3d() = default;
-    ~orbit3d() = default;
-
+    std::string name = "default";
     double time = 0;
     double dt = 0.001;
     double lcn = 0;
     double megno = 0;
+    std::ofstream outputfile;
     vec12 vec = {{0, 0, 0, 0, 0, 0, div, div, div, div, div, div}};
     const double getTime() { return time; }
     const vec6 getState() {
@@ -95,6 +120,11 @@ class orbit3d {
     }
     const vec3 getPosition() { return {{vec[0], vec[1], vec[2]}}; }
     const vec3 getVelocity() { return {{vec[3], vec[4], vec[5]}}; }
+    std::string getName() { return name; };
+    void setName(std::string newname) { name = newname; };
+    void setDt(double t) { dt = t; };
+    void setOutputFile() { outputfile.open("assets/" + getName() + ".txt"); };
+    void closeOutputFile() { outputfile.close(); };
     const double getJacobi();
     vec2 deltaNormCal();
 
@@ -117,15 +147,13 @@ static void printInteData(orbit3d &orb) {
               << std::endl;
 }
 
-static std::ofstream outputfile("assets/out.txt");
-
 static void writeInteData(orbit3d &orb) {
-    outputfile << orb.getTime() << '\t';
+    orb.outputfile << orb.getTime() << '\t';
     double j;
     BOOST_FOREACH (j, orb.getPosition())
-        outputfile << j << '\t';
-    outputfile << orb.getJacobi() << '\t' << orb.getLCN() << '\t'
-               << orb.getMEGNO() << std::endl;
+        orb.outputfile << j << '\t';
+    orb.outputfile << orb.getJacobi() << '\t' << orb.getLCN() << '\t'
+                   << orb.getMEGNO() << std::endl;
 }
 
 class pcrtbp {
@@ -172,12 +200,15 @@ class crtbp {
   public:
     crtbp() = default;
     ~crtbp() = default;
-    orbit3d *orb;
-    void inteSingle(orbit3d &orbit, double endtime, double dt);
+    orbit3d *orbits;
+    void inteSingle(orbit3d &orbit, double endtime, size_t jump);
+    void inteNbody(orbit3d orbits[], size_t n, double endtime, size_t jump);
     static double jacobiConstant(const vec6 &x);
     static void eqOfMotion(const vec6 &x, vec6 &dxdt);
     static void eqOfVariation(const vec6 &x, vec6 &dxdt, const vec6 &p);
     static vec6 uxxMatrix(const vec3 &x);
+    static vec6 elementsToState(const vec6 &in);
+    static double true2mean(double theta, double e);
 
   private:
     class crtbp_ode {

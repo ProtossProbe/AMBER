@@ -9,10 +9,10 @@
 #include "crtbp.hpp"
 #include <boost/array.hpp>
 #include <boost/numeric/odeint.hpp>
-#include <cmath>
+#include <ctime>
 #include <fstream>
 #include <iostream>
-#include <sstream>
+#include <libiomp/omp.h>
 #include <string>
 
 using namespace std;
@@ -21,12 +21,26 @@ using namespace boost::numeric::odeint;
 
 int main(int argc, char *argv[]) {
     string inputstring(argv[1]);
+    string infostring(argv[2]);
     auto input = readInputFromTxt(inputstring);
+    auto info = readInfoFromTxt(infostring);
+    int number = input.size();
+    cout << number << endl;
+    double endt = info[0], dt = info[1];
+    int jump = info[2];
 
-    outputfile.open("assets/rot.txt");
     crtbp system;
-    orbit3d orbit;
-    orbit.setState(input[0]);
-    system.inteSingle(orbit, 1000, 0.01);
-    outputfile.close();
+    orbit3d orbits[MAX_NUMBER];
+    for (size_t i = 0; i < number; i++) {
+        orbits[i].setState(input[i]);
+        orbits[i].setDt(dt);
+        orbits[i].setName("Ast_" + to_string(i + 1));
+    }
+    vec6 temp = system.elementsToState(input[0]);
+    for (auto var : temp) {
+        cout << var << '\t';
+    }
+    // double start = omp_get_wtime();
+    // system.inteNbody(orbits, number, endt, jump);
+    // cout << "Time: " << omp_get_wtime() - start << endl;
 }
