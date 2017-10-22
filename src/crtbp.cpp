@@ -126,22 +126,27 @@ vec6 crtbp::uxxMatrix(const vec3 &x) {
 const double orbit3d::getJacobi() {
     return crtbp::jacobiConstant(orbit3d::getState());
 }
-const double orbit3d::deltaNorm() { return vector6Norm(orbit3d::getDelta()); }
-const double orbit3d::deltaDotNorm() {
-    vec6 result;
-    crtbp::eqOfVariation(orbit3d::getDelta(), result, orbit3d::getState());
-    return vector6Norm(result);
+
+vec2 orbit3d::deltaNormCal() {
+    vec2 delta;
+    vec6 delta_vec = orbit3d::getDelta();
+    delta[0] = vector6Norm(delta_vec);
+    vec6 deltadot_vec;
+    crtbp::eqOfVariation(delta_vec, deltadot_vec, orbit3d::getState());
+    delta[1] = vec6Dot(deltadot_vec, delta_vec) / delta[0];
+    return delta;
 }
 
 double orbit3d::getLCN() {
     if (time > 0)
-        return log(orbit3d::deltaNorm() / sqrt(6) / div) / time;
+        return log(vector6Norm(orbit3d::getDelta()) / sqrt(6) / div) / time;
     else
         return 0.0;
 }
 
 void orbit3d::updateMEGNO() {
-    double incr = orbit3d::deltaDotNorm() / orbit3d::deltaNorm() * dt * time;
+    vec2 delta = orbit3d::deltaNormCal();
+    double incr = delta[1] / delta[0] * dt * time;
     megno_temp += incr;
 }
 

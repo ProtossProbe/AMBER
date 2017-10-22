@@ -19,11 +19,14 @@ using namespace std;
 using namespace boost::math;
 using namespace boost::numeric::odeint;
 
-int main() {
-    // output.open("assets/rot.txt");
+int main(int argc, char *argv[]) {
+    string inputstring(argv[1]);
+    auto input = readInputFromTxt(inputstring);
+
+    outputfile.open("assets/rot.txt");
     crtbp system;
     orbit3d orbit;
-    orbit.setState({{1.5, 0, 0, 0, -0.8835, 0.01}});
+    orbit.setState(input[0]);
     system.inteSingle(orbit, 1000, 0.01);
-    // output.close();
+    outputfile.close();
 }

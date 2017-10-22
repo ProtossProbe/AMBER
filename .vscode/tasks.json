@@ -21,6 +21,7 @@
         {
             "taskName": "run",
             "command": "./main",
+            "args": ["assets/input.txt"],
             "group": {
                 "kind": "test",
                 "isDefault": true

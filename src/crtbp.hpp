@@ -48,6 +48,30 @@ static double vector6Norm(const vec6 &v) {
                 v[4] * v[4] + v[5] * v[5]);
 }
 
+static double vec6Dot(const vec6 &v1, const vec6 &v2) {
+    double result = 0;
+    for (size_t i = 0; i < v1.size(); i++) {
+        result += v1[i] * v2[i];
+    }
+    return result;
+}
+
+static std::vector<vec6> readInputFromTxt(const std::string &inputstring) {
+    std::ifstream inputfile;
+    inputfile.open(inputstring);
+    std::vector<vec6> inputmatrix;
+    vec6 inputarray;
+    if (inputfile.is_open()) {
+        while (!inputfile.eof()) {
+            for (size_t i = 0; i < 6; i++) {
+                inputfile >> inputarray[i];
+            }
+            inputmatrix.push_back(inputarray);
+        }
+    }
+    return inputmatrix;
+}
+
 class orbit3d {
   private:
     double div = 1e-8;
@@ -72,9 +96,7 @@ class orbit3d {
     const vec3 getPosition() { return {{vec[0], vec[1], vec[2]}}; }
     const vec3 getVelocity() { return {{vec[3], vec[4], vec[5]}}; }
     const double getJacobi();
-
-    const double deltaNorm();
-    const double deltaDotNorm();
+    vec2 deltaNormCal();
 
     double getLCN();
     void updateMEGNO();
@@ -101,9 +123,9 @@ static void writeInteData(orbit3d &orb) {
     outputfile << orb.getTime() << '\t';
     double j;
     BOOST_FOREACH (j, orb.getPosition())
-    outputfile << j << '\t';
+        outputfile << j << '\t';
     outputfile << orb.getJacobi() << '\t' << orb.getLCN() << '\t'
-              << orb.getMEGNO() << std::endl;
+               << orb.getMEGNO() << std::endl;
 }
 
 class pcrtbp {
@@ -155,6 +177,7 @@ class crtbp {
     static double jacobiConstant(const vec6 &x);
     static void eqOfMotion(const vec6 &x, vec6 &dxdt);
     static void eqOfVariation(const vec6 &x, vec6 &dxdt, const vec6 &p);
+    static vec6 uxxMatrix(const vec3 &x);
 
   private:
     class crtbp_ode {
@@ -166,8 +189,6 @@ class crtbp {
       public:
         void operator()(const vec12 &x, vec12 &dxdt, double t);
     };
-
-    static vec6 uxxMatrix(const vec3 &x);
 };
 
 #endif
