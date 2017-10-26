@@ -5,7 +5,9 @@
         "type": "cppdbg",
         "request": "launch",
         "program": "${workspaceRoot}/main",
-        "args": [],
+        "args": ["assets/input.in",
+            "assets/info.in"
+        ],
         "stopAtEntry": false,
         "cwd": "${workspaceRoot}",
         "environment": [],

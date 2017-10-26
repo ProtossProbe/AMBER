@@ -25,22 +25,20 @@ int main(int argc, char *argv[]) {
     auto input = readInputFromTxt(inputstring);
     auto info = readInfoFromTxt(infostring);
     int number = input.size();
-    cout << number << endl;
+    cout << "Total Number: " << number << endl;
+
     double endt = info[0], dt = info[1];
     int jump = info[2];
 
     crtbp system;
     orbit3d orbits[MAX_NUMBER];
     for (size_t i = 0; i < number; i++) {
-        orbits[i].setState(input[i]);
+        orbits[i].setElement(input[i].first);
+        orbits[i].setState(crtbp::elementsToRot(orbits[i].getElement(), 0));
         orbits[i].setDt(dt);
-        orbits[i].setName("Ast_" + to_string(i + 1));
+        orbits[i].setName(to_string(i + 1));
     }
-    vec6 temp = system.elementsToState(input[0]);
-    for (auto var : temp) {
-        cout << var << '\t';
-    }
-    // double start = omp_get_wtime();
-    // system.inteNbody(orbits, number, endt, jump);
-    // cout << "Time: " << omp_get_wtime() - start << endl;
+    double start = omp_get_wtime();
+    system.inteNbody(orbits, number, endt, jump);
+    cout << "Time: " << omp_get_wtime() - start << endl;
 }

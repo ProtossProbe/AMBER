@@ -3,7 +3,7 @@
 //
 //
 //  Created by Protoss Probe on 2017/06/07.
-//  Copyright © 2016-2017年 probe. All rights reseouted.
+//  Copyright Â© 2016-2017å¹´ probe. All rights reseouted.
 //
 
 #include "crtbp.hpp"
@@ -80,18 +80,48 @@ double crtbp::jacobiConstant(const vec6 &x) {
            2 * mu / r2;
 }
 
+void crtbp::inteSingleAdaptive(orbit3d &orbit, double endtime, size_t jump) {
+    crtbp_ode_variation eq;
+    bulirsch_stoer<vec12> stepper(1e-12, 1e-12, orbit.dt, orbit.dt);
+    // runge_kutta_dopri5<vec12> stepper_const;
+    // auto stepper = make_controlled(1e-12, 1e-12, orbit.dt, stepper_const);
+    double tick = endtime * 0.15;
+    orbit.setOutputFile();
+    cout << "Start: " << orbit.getName() << endl;
+    try {
+        integrate_const(stepper, eq, orbit.vec, 0., endtime, orbit.dt,
+                        observer(orbit, jump, tick));
+    } catch (double megno) {
+        cout << "Stop when MEGNO is larger than 8" << endl;
+        orbit.megno_max = megno;
+    }
+    writeSummary(orbit);
+    orbit.closeOutputFile();
+    cout << "End: " << orbit.getName() << endl;
+    cout << endl;
+}
+
+void crtbp::writeSummary(orbit3d &orbit) {
+    summary << orbit.getName() << " " << setprecision(5) << orbit.getJacobi()
+            << " " << orbit.getElement()[1] << " " << orbit.getElement()[2]
+            << " " << orbit.getMEGNOMax() << endl;
+}
+
 void crtbp::inteSingle(orbit3d &orbit, double endtime, size_t jump) {
+    crtbp_ode_variation eq;
     runge_kutta_dopri5<vec12> stepper;
+    auto stepper_controlled = make_controlled(1e-12, 1e-12, orbit.dt, stepper);
+
     orbit.setOutputFile();
     cout << "Start: " << orbit.getName() << endl;
     size_t steps = 0;
+    double tick = endtime * 0.15;
     while (orbit.time <= endtime) {
-        orbit.updateMEGNO();
+        orbit.updateMEGNO(tick);
         if (steps % jump == 0) {
             writeInteData(orbit);
         }
-
-        stepper.do_step(crtbp_ode_variation(), orbit.vec, 0.0, orbit.dt);
+        stepper.do_step(eq, orbit.vec, 0.0, orbit.dt);
         orbit.time += orbit.dt;
         steps++;
     }
@@ -101,13 +131,13 @@ void crtbp::inteSingle(orbit3d &orbit, double endtime, size_t jump) {
 }
 
 void crtbp::inteNbody(orbit3d orbits[], size_t n, double endtime, size_t jump) {
-#pragma omp parallel num_threads(4)
-    {
-#pragma omp for
-        for (size_t i = 0; i < n; i++) {
-            crtbp::inteSingle(orbits[i], endtime, jump);
-        }
+    summary.open(GLOBAL_LOCATION + "summary.out");
+#pragma omp parallel for schedule(dynamic, 4) num_threads(6)
+    for (size_t i = 0; i < n; i++) {
+        crtbp::inteSingleAdaptive(orbits[i], endtime, jump);
     }
+
+    summary.close();
 }
 
 vec6 crtbp::uxxMatrix(const vec3 &x) {
@@ -156,7 +186,7 @@ vec6 crtbp::elementsToState(const vec6 &in) {
     double a = in[0], e = in[1], I = in[2] * pi180, g = in[3] * pi180,
            n = in[4] * pi180, f = in[5] * pi180;
     vec6 out;
-    double p = a * fabs(1.0 - e * e); //???
+    double p = a * fabs(1.0 - e * e);
 
     double sini, cosi, sing, cosg, sinn, cosn;
     sini = sin(I);
@@ -166,14 +196,11 @@ vec6 crtbp::elementsToState(const vec6 &in) {
     sinn = sin(g);
     cosn = cos(g);
 
-    //??????????,????????
     vec3 HVector = {{sini * sing, -sini * cosg, cosi}};
 
-    //???????,??Laplace??
     vec3 PVector = {{cosg * cosn - sing * sinn * cosi,
                      sing * cosn + cosg * sinn * cosi, sinn * sini}};
 
-    //?????????,PVector,QVector,HVector???????
     // QVector=[-cosg*sinn-sing*cosn*cosi;-sing*sinn+cosg*cosn*cosi;cosn*sini];
     vec3 QVector = vec3Cross(HVector, PVector);
     double r = 0.0;
@@ -185,6 +212,39 @@ vec6 crtbp::elementsToState(const vec6 &in) {
     }
     return out;
 }
+
+vec6 crtbp::inertialToRot(const vec6 &x, const double t) {
+    double c = cos(t);
+    double s = sin(t);
+    vec6 result;
+    result[0] = c * x[0] + s * x[1];
+    result[1] = -s * x[0] + c * x[1];
+    result[2] = x[2];
+    result[3] = -s * (x[0] - x[4]) + c * (x[3] + x[1]);
+    result[4] = -s * (x[3] + x[1]) - c * (x[0] - x[4]);
+    result[5] = x[5];
+    result[0] -= mu;
+    return result;
+}
+
+vec6 crtbp::rotToInertial(const vec6 &x, const double t) {
+    double c = cos(t);
+    double s = sin(t);
+    double x0 = x[0] + mu;
+    vec6 result;
+    result[0] = c * x0 - s * x[1];
+    result[1] = s * x0 + c * x[1];
+    result[2] = x[2];
+    result[3] = -s * (x0 + x[4]) + c * (x[3] - x[1]);
+    result[4] = s * (x[3] - x[1]) + c * (x0 + x[4]);
+    result[5] = x[5];
+    return result;
+}
+
+vec6 crtbp::elementsToRot(const vec6 &x, const double t) {
+    return crtbp::inertialToRot(crtbp::elementsToState(x), t);
+}
+
 double crtbp::true2mean(double theta, double e) {
     double E = 2 * atan(sqrt((1 - e) / (1 + e)) * tan(theta / 2));
     return E - e * sin(E);
@@ -211,22 +271,25 @@ double orbit3d::getLCN() {
         return 0.0;
 }
 
-void orbit3d::updateMEGNO() {
+void orbit3d::updateMEGNO(double ticktime) {
     vec2 delta = orbit3d::deltaNormCal();
-    double incr = delta[1] / delta[0] * dt * time;
-    megno_temp += incr;
-    steps++;
+    if (time > 0) {
+        double incr = delta[1] / delta[0] * dt * time;
+        megno_temp += incr;
+        megno_fast = megno_temp / time * 2;
+        if (time > ticktime) {
+            size_t new_steps = steps - ticktime / dt;
+            megno_sum += megno_fast;
+            megno = megno_sum / (steps - new_steps);
+            if (megno > megno_max)
+                megno_max = megno;
+        }
+    }
 }
 
-double orbit3d::getMEGNO() {
-    if (time > 0 and steps > 0) {
-        megno_fast = megno_temp / time * 2;
-        megno_sum += megno_fast;
-        megno = megno_sum / steps;
-        return megno;
-    }
-    return 0.0;
-}
+double orbit3d::getMEGNO() { return megno; }
+
+double orbit3d::getMEGNOMax() { return megno_max; }
 
 void orbit3d::setState(const vec6 &state) {
     for (size_t i = 0; i < state.size(); i++) {
