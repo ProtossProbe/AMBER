@@ -3,23 +3,15 @@
 //
 //
 //  Created by Protoss Probe on 2017/06/07.
-//  Copyright Â© 2016-2017å¹´ probe. All rights reseouted.
+//  Copyright © 2016-2017 probe. All rights reserved.
 //
 
 #include "crtbp.hpp"
-#include <boost/array.hpp>
-#include <boost/numeric/odeint.hpp>
-#include <cmath>
-#include <fstream>
-#include <iostream>
-#include <math.h>
-#include <sstream>
-#include <string>
-#include <vector>
 
 using namespace std;
 using namespace boost::math;
 using namespace boost::numeric::odeint;
+using namespace ProbeUtility;
 
 void crtbp::crtbp_ode::operator()(const vec6 &x, vec6 &dxdt, double t) {
     crtbp::eqOfMotion(x, dxdt);
@@ -34,7 +26,7 @@ void crtbp::crtbp_ode_variation::operator()(const vec12 &x, vec12 &dxdt,
     crtbp::eqOfMotion(x1, dxdt1);
     crtbp::eqOfVariation(x2, dxdt2, x1);
 
-    dxdt = joinVector6(dxdt1, dxdt2);
+    joinVec(dxdt, dxdt1, dxdt2);
 };
 
 void crtbp::eqOfMotion(const vec6 &x, vec6 &dxdt) {
@@ -202,7 +194,8 @@ vec6 crtbp::elementsToState(const vec6 &in) {
                      sing * cosn + cosg * sinn * cosi, sinn * sini}};
 
     // QVector=[-cosg*sinn-sing*cosn*cosi;-sing*sinn+cosg*cosn*cosi;cosn*sini];
-    vec3 QVector = vec3Cross(HVector, PVector);
+    vec3 QVector;
+    vec3Cross(QVector, HVector, PVector);
     double r = 0.0;
     r = p / (1.0 + e * cos(f));
     for (int i = 0; i < 3; i++) {
@@ -250,23 +243,35 @@ double crtbp::true2mean(double theta, double e) {
     return E - e * sin(E);
 }
 
-const double orbit3d::getJacobi() {
-    return crtbp::jacobiConstant(orbit3d::getState());
+void orbit3d::calInerState(){
+    vec_inertial = crtbp::rotToInertial(orbit3d::getState(),orbit3d::getTime());
+}
+
+double orbit3d::getJacobi() {
+    jacobi = crtbp::jacobiConstant(orbit3d::getState());
+    return jacobi;
+}
+
+double orbit3d::errorJacobi() {
+    if (jacobi0 != 0) {
+        return (jacobi - jacobi0) / jacobi0;
+    }
+    return 0.0;
 }
 
 vec2 orbit3d::deltaNormCal() {
     vec2 delta;
     vec6 delta_vec = orbit3d::getDelta();
-    delta[0] = vector6Norm(delta_vec);
+    delta[0] = vecNorm(delta_vec);
     vec6 deltadot_vec;
     crtbp::eqOfVariation(delta_vec, deltadot_vec, orbit3d::getState());
-    delta[1] = vec6Dot(deltadot_vec, delta_vec) / delta[0];
+    delta[1] = vecDot(deltadot_vec, delta_vec) / delta[0];
     return delta;
 }
 
 double orbit3d::getLCN() {
     if (time > 0)
-        return log(vector6Norm(orbit3d::getDelta()) / sqrt(6) / div) / time;
+        return log(vecNorm(orbit3d::getDelta()) / sqrt(6) / div) / time;
     else
         return 0.0;
 }

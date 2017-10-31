@@ -7,13 +7,6 @@
 //
 
 #include "crtbp.hpp"
-#include <boost/array.hpp>
-#include <boost/numeric/odeint.hpp>
-#include <ctime>
-#include <fstream>
-#include <iostream>
-#include <libiomp/omp.h>
-#include <string>
 
 using namespace std;
 using namespace boost::math;
@@ -27,7 +20,7 @@ int main(int argc, char *argv[]) {
     int number = input.size();
     cout << "Total Number: " << number << endl;
 
-    double endt = info[0], dt = info[1];
+    double endt = info[0] * pi2, dt = info[1] / year * pi2;
     int jump = info[2];
 
     crtbp system;
@@ -37,6 +30,7 @@ int main(int argc, char *argv[]) {
         orbits[i].setState(crtbp::elementsToRot(orbits[i].getElement(), 0));
         orbits[i].setDt(dt);
         orbits[i].setName(to_string(i + 1));
+        orbits[i].jacobi0 = orbits[i].getJacobi();
     }
     double start = omp_get_wtime();
     system.inteNbody(orbits, number, endt, jump);
