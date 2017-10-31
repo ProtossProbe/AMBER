@@ -11,6 +11,7 @@ bin
 *.slo
 *.lo
 *.o
+*.dSYM
 
 # Precompiled Headers
 *.gch
@@ -33,8 +34,8 @@ bin
 
 # Executables
 *.exe
-*.out
 *.app
 
 #data files
 *.dat
+*.txt

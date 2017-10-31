@@ -1,2 +1,5 @@
-# crtbp
-cpp code for a traditional planar ctrbp system
+# AMBER
+
+AMBER - A siMple crtBp intEgratoR
+
+Developing...
