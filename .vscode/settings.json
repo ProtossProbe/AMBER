@@ -49,6 +49,9 @@
         "utility": "cpp",
         "valarray": "cpp",
         "*.ipp": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "ios": "cpp",
+        "algorithm": "cpp",
+        "locale": "cpp"
     }
 }

@@ -14,6 +14,7 @@
 #include <boost/array.hpp>
 #include <boost/foreach.hpp>
 #include <boost/numeric/odeint.hpp>
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <libiomp/omp.h>
@@ -25,7 +26,10 @@
 const double pi = M_PI;
 const double pi2 = 2 * M_PI;
 const double pi180 = pi / 180;
+const double pi_180 = 180 / pi;
 const double mu = 0.001;
+const double mu_sun = 1 - mu;
+const double muu = mu_sun;
 const size_t MAX_NUMBER = 1000;
 const double year = 365.25636042;
 const std::string GLOBAL_OUTPUT_LOCATION = "assets/_output/";
@@ -161,6 +165,7 @@ class crtbp {
     static void eqOfMotion(const vec6 &x, vec6 &dxdt);
     static void eqOfVariation(const vec6 &x, vec6 &dxdt, const vec6 &p);
     static vec6 elementsToState(const vec6 &in);
+    static vec6 StateToElements(const vec6 &in, const char option = 'f');
     static vec6 inertialToRot(const vec6 &x, const double t);
     static vec6 rotToInertial(const vec6 &x, const double t);
     static vec6 elementsToRot(const vec6 &x, const double t);

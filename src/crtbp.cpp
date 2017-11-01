@@ -33,7 +33,6 @@ void crtbp::eqOfMotion(const vec6 &x, vec6 &dxdt) {
     double x1 = x[0], x2 = x[1], x3 = x[2], x4 = x[3], x5 = x[4], x6 = x[5];
     double r1, r2;
     double xmu = x1 + mu, xmu1 = xmu - 1;
-    double muu = 1 - mu;
     double x22 = x2 * x2, x33 = x3 * x3;
     r1 = sqrt(pow(xmu, 2) + x22 + x33);
     r2 = sqrt(pow(xmu1, 2) + x22 + x33);
@@ -136,7 +135,7 @@ vec6 crtbp::uxxMatrix(const vec3 &x) {
     double x1 = x[0], x2 = x[1], x3 = x[2];
     double uxx, uxy, uxz, uyy, uyz, uzz;
 
-    double xmu = x1 + mu, xmu1 = xmu - 1, muu = 1 - mu;
+    double xmu = x1 + mu, xmu1 = xmu - 1;
     double xmuu = xmu * xmu, xmu11 = xmu1 * xmu1;
     double x22 = x2 * x2, x33 = x3 * x3;
     double r1, r13, r15, r2, r23, r25;
@@ -168,7 +167,7 @@ vec6 crtbp::uxxMatrix(const vec3 &x) {
 
 vec6 crtbp::elementsToState(const vec6 &in) {
     // input: {{a,e,I,g,n,f}}
-    // output:: {{x,y,z,u,v,w}} (inerital)
+    // output: {{x,y,z,u,v,w}} (inerital)
     // a = semi-major axis (in AU)
     // e = eccentricity
     // I = inclination (degrees)
@@ -200,10 +199,95 @@ vec6 crtbp::elementsToState(const vec6 &in) {
     r = p / (1.0 + e * cos(f));
     for (int i = 0; i < 3; i++) {
         out[i] = r * (cos(f) * PVector[i] + sin(f) * QVector[i]);
-        out[3 + i] =
-            sqrt(1 / p) * (-sin(f) * PVector[i] + (cos(f) + e) * QVector[i]);
+        out[3 + i] = sqrt(mu_sun / p) *
+                     (-sin(f) * PVector[i] + (cos(f) + e) * QVector[i]);
     }
     return out;
+}
+
+vec6 crtbp::StateToElements(const vec6 &in, const char option) {
+    // input: {{x,y,z,u,v,w}} (inerital)
+    // output: {{a,e,I,g,n,f}} or {{a,e,I,g,n,m}}
+    // a = semi-major axis (in AU)
+    // e = eccentricity
+    // I = inclination (degrees)
+    // g = argument of pericentre (degrees)
+    // n = longitude of the ascending node (degrees)
+    // f = true anomaly (degrees)
+    // m = mean anomaly (degrees)
+    int i;
+    double a, e, I, g, n, f;
+    double temp1, temp2;
+    vec3 R = {{in[0], in[1], in[2]}};
+    vec3 V = {{in[3], in[4], in[5]}};
+    double radius = vecNorm(R);
+    double vel = vecNorm(V);
+    double vr = vecDot(R, V) / radius;
+    vec3 unitR, unitV, hvector, unith, evector, unite, nvector, unitN, temp;
+    vecDevide(unitR, R, radius);
+    vecDevide(unitV, V, vel);
+    vec3Cross(hvector, R, V);
+    double hnorm = vecNorm(hvector);
+    vecDevide(unith, hvector, hnorm);
+    temp1 = vel * vel - mu_sun / radius;
+    temp2 = radius * vr;
+    for (i = 0; i < 3; i++)
+        evector[i] = (temp1 * R[i] - temp2 * V[i]) / mu_sun;
+    e = vecNorm(evector);
+    bool isCircle = (fabs(e) <= 1e-15);
+    a = hnorm * hnorm / (mu_sun * (1 - e * e));
+    vecDevide(unite, evector, e);
+    I = acos(unith[2]);
+    unitN = {{-unith[1], unith[0], 0}};
+    if (vecNorm(unitN) == 0) {
+        n = 0;
+        if (isCircle) {
+            g = 0;
+            f = atan2(unitR[1] * unith[2], unitR[0]);
+        } else {
+            vec3Cross(temp, unite, unitR);
+            g = atan2(unite[1] * unith[2], unite[0]);
+            f = atan2(vecDot(unith, temp), vecDot(unite, unitR));
+        }
+    } else {
+        vec3Cross(temp, unitN, unitR);
+        n = atan2(unith[0], -unith[1]);
+        f = atan2(vecDot(unith, temp), vecDot(unitN, unitR));
+        if (isCircle) {
+            g = 0;
+        } else {
+            vec3Cross(temp, unitN, unite);
+            g = atan2(vecDot(unith, temp), vecDot(unite, unitN));
+            f = f - g;
+        }
+    }
+    if (g < 0) {
+        g += 2 * pi;
+    }
+    if (n < 0) {
+        n += 2 * pi;
+    }
+    I *= pi_180;
+    g *= pi_180;
+    n *= pi_180;
+
+    if (option == 'f') {
+        if (f < 0) {
+            f += 2 * pi;
+        }
+        f *= pi_180;
+        return {{a, e, I, g, n, f}};
+    }
+    if (option == 'm') {
+        double m = crtbp::true2mean(f, e);
+        if (m < 0) {
+            m += 2 * pi;
+        }
+        m *= pi_180;
+        return {{a, e, I, g, n, m}};
+    } else {
+        throw "option must be 'f' or 'm'!";
+    }
 }
 
 vec6 crtbp::inertialToRot(const vec6 &x, const double t) {
@@ -243,8 +327,9 @@ double crtbp::true2mean(double theta, double e) {
     return E - e * sin(E);
 }
 
-void orbit3d::calInerState(){
-    vec_inertial = crtbp::rotToInertial(orbit3d::getState(),orbit3d::getTime());
+void orbit3d::calInerState() {
+    vec_inertial =
+        crtbp::rotToInertial(orbit3d::getState(), orbit3d::getTime());
 }
 
 double orbit3d::getJacobi() {
