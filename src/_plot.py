@@ -57,13 +57,9 @@ data1 = np.loadtxt(target[0])
 fig1, [ax1, ax2] = plt.subplots(2)
 fig2, [ax3, ax4] = plt.subplots(2, sharex=True)
 
-ax1.set_xlim(-1.5, 1.5)
-ax2.set_xlim(-1.5, 1.5)
-ax1.set_ylim(-1.5, 1.5)
-
 # for file in target:
-ax1.plot(data1[:, 1], data1[:, 2], linewidth=0.1)
-ax2.plot(data1[:, 2], data1[:, 3], linewidth=0.1)
+ax1.plot(data1[:, 0], data1[:, 1], linewidth=1)
+ax2.plot(data1[:, 0], data1[:, 2], linewidth=1)
 
 ax3.plot(data1[:, 0], data1[:, 5])
 # ax1.plot(data1[:n, 1], data1[:n, 2], 'r', linewidth=2)

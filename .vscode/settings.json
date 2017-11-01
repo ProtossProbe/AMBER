@@ -52,6 +52,7 @@
         "string": "cpp",
         "ios": "cpp",
         "algorithm": "cpp",
-        "locale": "cpp"
+        "locale": "cpp",
+        "bitset": "cpp"
     }
 }

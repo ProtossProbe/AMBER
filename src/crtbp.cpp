@@ -76,12 +76,11 @@ void crtbp::inteSingleAdaptive(orbit3d &orbit, double endtime, size_t jump) {
     bulirsch_stoer<vec12> stepper(1e-12, 1e-12, orbit.dt, orbit.dt);
     // runge_kutta_dopri5<vec12> stepper_const;
     // auto stepper = make_controlled(1e-12, 1e-12, orbit.dt, stepper_const);
-    double tick = endtime * 0.15;
     orbit.setOutputFile();
     cout << "Start: " << orbit.getName() << endl;
     try {
         integrate_const(stepper, eq, orbit.vec, 0., endtime, orbit.dt,
-                        observer(orbit, jump, tick));
+                        observer(orbit, jump));
     } catch (double megno) {
         cout << "Stop when MEGNO is larger than 8" << endl;
         orbit.megno_max = megno;
@@ -94,7 +93,7 @@ void crtbp::inteSingleAdaptive(orbit3d &orbit, double endtime, size_t jump) {
 
 void crtbp::writeSummary(orbit3d &orbit) {
     summary << orbit.getName() << " " << setprecision(5) << orbit.getJacobi()
-            << " " << orbit.getElement()[1] << " " << orbit.getElement()[2]
+            << " " << orbit.getElements()[1] << " " << orbit.getElements()[2]
             << " " << orbit.getMEGNOMax() << endl;
 }
 
@@ -106,9 +105,7 @@ void crtbp::inteSingle(orbit3d &orbit, double endtime, size_t jump) {
     orbit.setOutputFile();
     cout << "Start: " << orbit.getName() << endl;
     size_t steps = 0;
-    double tick = endtime * 0.15;
     while (orbit.time <= endtime) {
-        orbit.updateMEGNO(tick);
         if (steps % jump == 0) {
             writeInteData(orbit);
         }
@@ -205,7 +202,7 @@ vec6 crtbp::elementsToState(const vec6 &in) {
     return out;
 }
 
-vec6 crtbp::StateToElements(const vec6 &in, const char option) {
+vec6 crtbp::stateToElements(const vec6 &in, const char option) {
     // input: {{x,y,z,u,v,w}} (inerital)
     // output: {{a,e,I,g,n,f}} or {{a,e,I,g,n,m}}
     // a = semi-major axis (in AU)
@@ -327,21 +324,19 @@ double crtbp::true2mean(double theta, double e) {
     return E - e * sin(E);
 }
 
-void orbit3d::calInerState() {
+void orbit3d::updateInerState() {
     vec_inertial =
         crtbp::rotToInertial(orbit3d::getState(), orbit3d::getTime());
 }
 
-double orbit3d::getJacobi() {
+void orbit3d::updateJacobi() {
     jacobi = crtbp::jacobiConstant(orbit3d::getState());
-    return jacobi;
-}
-
-double orbit3d::errorJacobi() {
-    if (jacobi0 != 0) {
-        return (jacobi - jacobi0) / jacobi0;
+    double error = jacobi - jacobi0;
+    if (error == 0) {
+        jacobi_err = jacobi0;
+    } else {
+        jacobi_err = error / jacobi0;
     }
-    return 0.0;
 }
 
 vec2 orbit3d::deltaNormCal() {
@@ -361,28 +356,50 @@ double orbit3d::getLCN() {
         return 0.0;
 }
 
-void orbit3d::updateMEGNO(double ticktime) {
+void orbit3d::updateMEGNO() {
     vec2 delta = orbit3d::deltaNormCal();
     if (time > 0) {
         double incr = delta[1] / delta[0] * dt * time;
         megno_temp += incr;
         megno_fast = megno_temp / time * 2;
         if (time > ticktime) {
-            size_t new_steps = steps - ticktime / dt;
+            new_steps++;
             megno_sum += megno_fast;
-            megno = megno_sum / (steps - new_steps);
+            megno = megno_sum / new_steps;
             if (megno > megno_max)
                 megno_max = megno;
         }
     }
 }
 
-double orbit3d::getMEGNO() { return megno; }
+void orbit3d::updateElements() {
+    ele = crtbp::stateToElements(vec_inertial, 'f');
+}
 
-double orbit3d::getMEGNOMax() { return megno_max; }
+// values need to be updated per step:
+// steps, time, megno, megno_max
+double orbit3d::updatePerStep(const double t) {
+    steps++;
+    time = t;
+    orbit3d::updateMEGNO();
+    return orbit3d::getMEGNOMax();
+}
 
-void orbit3d::setState(const vec6 &state) {
-    for (size_t i = 0; i < state.size(); i++) {
-        vec[i] = state[i];
-    }
+// values need to be updated per output:
+// jacobi, jacobi_err, vec_inertial, ele
+void orbit3d::updatePerOutput() {
+    orbit3d::updateJacobi();
+    orbit3d::updateInerState();
+    orbit3d::updateElements();
+}
+
+// values need to be set in the first time:
+// ele, dt, name, vec, jacobi0
+void orbit3d::setInitial(vec6 elements, double dtt, string na) {
+    ele = elements;
+    dt = dtt;
+    name = na;
+    orbit3d::setState(crtbp::elementsToRot(orbit3d::getElements(), 0));
+    jacobi0 = crtbp::jacobiConstant(orbit3d::getState());
+    ;
 }

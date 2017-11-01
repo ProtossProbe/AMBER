@@ -25,21 +25,17 @@ int main(int argc, char *argv[]) {
     int jump = info[2];
 
     crtbp system;
-    // orbit3d orbits[MAX_NUMBER];
-    // for (size_t i = 0; i < number; i++) {
-    //     orbits[i].setElement(input[i].first);
-    //     orbits[i].setState(crtbp::elementsToRot(orbits[i].getElement(), 0));
-    //     orbits[i].setDt(dt);
-    //     orbits[i].setName(to_string(i + 1));
-    //     orbits[i].jacobi0 = orbits[i].getJacobi();
-    // }
-    // double start = omp_get_wtime();
-    // system.inteNbody(orbits, number, endt, jump);
-    // cout << "Time: " << omp_get_wtime() - start << endl;
+    orbit3d orbits[MAX_NUMBER];
+    for (size_t i = 0; i < number; i++) {
+        orbits[i].setInitial(input[i].first, dt, to_string(i + 1));
+    }
+    double start = omp_get_wtime();
+    system.inteNbody(orbits, number, endt, jump);
+    cout << "Time: " << omp_get_wtime() - start << endl;
 
-    vecPrint(input[0].first);
-    vec6 state = system.elementsToState(input[0].first);
-    vecPrint(state);
-    vec6 ele = system.StateToElements(state);
-    vecPrint(ele);
+    // vecPrint(input[0].first);
+    // vec6 state = system.elementsToState(input[0].first);
+    // vecPrint(state);
+    // vec6 ele = system.StateToElements(state);
+    // vecPrint(ele);
 }
