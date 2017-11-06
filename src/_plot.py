@@ -4,64 +4,42 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 mu = 0.001
+LOCATION = "assets/_output/"
+index = 5
+
+target = LOCATION + "Ast_" + str(index) + ".txt"
+target2 = LOCATION + "A_" + str(index) + ".txt"
+data2 = np.loadtxt(target2, skiprows=4)
+
+data1 = np.loadtxt(target)
+data1[:, 0] = data1[:, 0] * 1.00027
+fig1, [ax1, ax2, ax3] = plt.subplots(3, sharex=True)
+
+ax1.plot(data1[:, 0], data1[:, 1])
+ax1.plot(data2[:, 0], data2[:, 4])
+ax1.grid(linestyle='dashed')
+
+ax2.plot(data1[:, 0], data1[:, 2])
+ax2.plot(data2[:, 0], data2[:, 5])
+ax2.grid(linestyle='dashed')
+
+ax3.plot(data1[:, 0], data1[:, 3])
+ax3.plot(data2[:, 0], data2[:, 6])
+ax3.grid(linestyle='dashed')
 
 
-def plot_primaries(ax):
-    ax.plot([1 - mu], [0], 'oy')
-    ax.plot([-mu], [0], 'ob')
-
-
-def orbit_plot(y, range=0.5):
-    """
-    给定一系列的轨道状态，画出三维空间下的轨道图
-    """
-    # 初始化2D绘图模块
-    fig, ax = plt.subplots()
-
-    # 指定绘图范围
-    ax.set_xlim(1 - range, 1 + range)
-    ax.set_ylim(-range, range)
-
-    # 画出轨道
-    if type(y) is np.ndarray:
-        ax.plot(y[:, 1], y[:, 2], alpha=0.7, linewidth=1.5)
-    elif type(y) is list:
-        for i in y:
-            ax.plot(i[:, 1], i[:, 2], alpha=0.7, linewidth=1.5)
-
-    plot_primaries(ax)
-    plt.show()
-
-
-def contour_plot(target):
-    fig, ax = plt.subplots()
-    # 指定绘图范围
-    ax.set_xlim(-0.5, 0.5)
-    ax.set_ylim(-0.5, 0.5)
-    for file in target:
-        data = np.loadtxt(file)
-        ax.scatter(data[:, 2] * np.cos(data[:, 3] / 2),
-                   data[:, 2] * np.sin(data[:, 3] / 2), s=3)
-    ax.grid(linestyle='dashed')
-    plt.show()
-
-
-target = ["assets/_output/Ast_1.txt"]
-
-
-data1 = np.loadtxt(target[0])
 # plt.plot(data2[:, 0], data2[:, 1])
 # plt.show()
 # data1 = np.loadtxt(target[2])
 # plt.plot(data1[:1000, 1], data1[:1000, 2])
-fig1, [ax1, ax2] = plt.subplots(2)
-fig2, [ax3, ax4] = plt.subplots(2, sharex=True)
+# fig1, [ax1, ax2] = plt.subplots(2)
+# fig2, [ax3, ax4] = plt.subplots(2, sharex=True)
 
 # for file in target:
-ax1.plot(data1[:, 0], data1[:, 1], linewidth=1)
-ax2.plot(data1[:, 0], data1[:, 2], linewidth=1)
+# ax1.plot(data1[:, 0], data1[:, 1], linewidth=1)
+# ax2.plot(data1[:, 0], data1[:, 2], linewidth=1)
 
-ax3.plot(data1[:, 0], data1[:, 5])
+# ax3.plot(data1[:, 0], data1[:, 5])
 # ax1.plot(data1[:n, 1], data1[:n, 2], 'r', linewidth=2)
 # plot_primaries(ax1)
 # ax2.plot(data2[:, 1], data2[:, 2], linewidth=0.5)
@@ -81,10 +59,10 @@ ax3.plot(data1[:, 0], data1[:, 5])
 # ax1.scatter(data1[:, 4] * 180 / np.pi, data1[:, 1], s=0.5)
 # ax2.scatter(data2[:, 2] * np.cos(data2[:, 3]),
 #             data2[:, 2] * np.sin(data2[:, 3]), s=0.5)
-ax1.grid(linestyle='dashed')
-ax2.grid(linestyle='dashed')
-ax3.grid(linestyle='dashed')
-ax4.grid(linestyle='dashed')
+# ax1.grid(linestyle='dashed')
+# ax2.grid(linestyle='dashed')
+# ax3.grid(linestyle='dashed')
+# ax4.grid(linestyle='dashed')
 
 # plt.show()
 

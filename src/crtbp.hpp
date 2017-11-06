@@ -41,7 +41,7 @@ const double pi_180 = 180 / pi;
 */
 const double mu = 0.001;
 const double mu_sun = 1 - mu;
-const double year = 365.25636042;
+const double year = 365.25;
 const double muu = mu_sun;
 const size_t MAX_NUMBER = 1000;
 
@@ -88,7 +88,7 @@ class orbit3d {
     double jacobi_err = 0;
 
     // current time
-    double time = 0;
+    double current_t = 0;
 
     // current time interval
     double dt = 0.001;
@@ -124,8 +124,8 @@ class orbit3d {
 
     // get & set functions
     // declared and defined in this header file
-    double getTime() { return time; }
-    double getTimeYear() { return time / pi2; }
+    double getTime() { return current_t; }
+    double getTimeYear() { return current_t / pi2; }
     vec6 getState() {
         return {{vec[0], vec[1], vec[2], vec[3], vec[4], vec[5]}};
     }
@@ -159,8 +159,8 @@ class orbit3d {
         std::string location = GLOBAL_OUTPUT_LOCATION + "Ast_" + getName();
         outputfile.open(location + ".txt");
     };
-    void setTickTime(double coef) { ticktime = coef * time; }
-    void setInitial(vec6 elements, double dtt, std::string na);
+    void setTickTime(double tick) { ticktime = tick; }
+    void setInitial(vec6 elements, double dtt, double endt, std::string na);
     void closeOutputFile() { outputfile.close(); };
 
     // declared here, defined in crtbp.cpp
@@ -227,6 +227,8 @@ class crtbp {
     static vec6 inertialToRot(const vec6 &x, const double t);
     static vec6 rotToInertial(const vec6 &x, const double t);
     static vec6 elementsToRot(const vec6 &x, const double t);
+    static double mean2true(double M, double e);
+    static double true2mean(double theta, double e);
 
   private:
     class crtbp_ode {
@@ -239,7 +241,7 @@ class crtbp {
         void operator()(const vec12 &x, vec12 &dxdt, double t);
     };
 
-    static double true2mean(double theta, double e);
+    static double keplerIteration(double E, double e, double M);
     static vec6 uxxMatrix(const vec3 &x);
 };
 

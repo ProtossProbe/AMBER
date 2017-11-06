@@ -53,6 +53,17 @@
         "ios": "cpp",
         "algorithm": "cpp",
         "locale": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "__split_buffer": "cpp",
+        "__tree": "cpp",
+        "deque": "cpp",
+        "iterator": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "queue": "cpp",
+        "set": "cpp",
+        "string_view": "cpp",
+        "vector": "cpp",
+        "__string": "cpp"
     }
 }

@@ -105,12 +105,12 @@ void crtbp::inteSingle(orbit3d &orbit, double endtime, size_t jump) {
     orbit.setOutputFile();
     cout << "Start: " << orbit.getName() << endl;
     size_t steps = 0;
-    while (orbit.time <= endtime) {
+    while (orbit.current_t <= endtime) {
         if (steps % jump == 0) {
             writeInteData(orbit);
         }
         stepper.do_step(eq, orbit.vec, 0.0, orbit.dt);
-        orbit.time += orbit.dt;
+        orbit.current_t += orbit.dt;
         steps++;
     }
     orbit.closeOutputFile();
@@ -320,8 +320,34 @@ vec6 crtbp::elementsToRot(const vec6 &x, const double t) {
 }
 
 double crtbp::true2mean(double theta, double e) {
+    if (theta == 0.0) {
+        return 0.0;
+    }
     double E = 2 * atan(sqrt((1 - e) / (1 + e)) * tan(theta / 2));
     return E - e * sin(E);
+}
+
+double crtbp::mean2true(double M, double e) {
+    if (M == 0.0) {
+        return 0.0;
+    }
+    double result, E;
+    if (M < pi and M > 0) {
+        E = M + e / 2;
+    } else {
+        E = M - e / 2;
+    };
+    double incr = 1;
+    while (fabs(incr) > 1e-14) {
+        incr = keplerIteration(E, e, M);
+        E += incr;
+    }
+    result = 2 * atan(sqrt((1 + e) / (1 - e)) * tan(E / 2));
+    return result;
+}
+
+double crtbp::keplerIteration(double E, double e, double M) {
+    return -(E - e * sin(E) - M) / (1 - e * cos(E));
 }
 
 void orbit3d::updateInerState() {
@@ -350,19 +376,19 @@ vec2 orbit3d::deltaNormCal() {
 }
 
 double orbit3d::getLCN() {
-    if (time > 0)
-        return log(vecNorm(orbit3d::getDelta()) / sqrt(6) / div) / time;
+    if (current_t > 0)
+        return log(vecNorm(orbit3d::getDelta()) / sqrt(6) / div) / current_t;
     else
         return 0.0;
 }
 
 void orbit3d::updateMEGNO() {
     vec2 delta = orbit3d::deltaNormCal();
-    if (time > 0) {
-        double incr = delta[1] / delta[0] * dt * time;
+    if (current_t > 0) {
+        double incr = delta[1] / delta[0] * dt * current_t;
         megno_temp += incr;
-        megno_fast = megno_temp / time * 2;
-        if (time > ticktime) {
+        megno_fast = megno_temp / current_t * 2;
+        if (current_t > ticktime) {
             new_steps++;
             megno_sum += megno_fast;
             megno = megno_sum / new_steps;
@@ -373,14 +399,14 @@ void orbit3d::updateMEGNO() {
 }
 
 void orbit3d::updateElements() {
-    ele = crtbp::stateToElements(vec_inertial, 'f');
+    ele = crtbp::stateToElements(vec_inertial, 'm');
 }
 
 // values need to be updated per step:
 // steps, time, megno, megno_max
 double orbit3d::updatePerStep(const double t) {
     steps++;
-    time = t;
+    current_t = t;
     orbit3d::updateMEGNO();
     return orbit3d::getMEGNOMax();
 }
@@ -395,11 +421,14 @@ void orbit3d::updatePerOutput() {
 
 // values need to be set in the first time:
 // ele, dt, name, vec, jacobi0
-void orbit3d::setInitial(vec6 elements, double dtt, string na) {
+void orbit3d::setInitial(vec6 elements, double dtt, double endt, string na) {
     ele = elements;
     dt = dtt;
     name = na;
-    orbit3d::setState(crtbp::elementsToRot(orbit3d::getElements(), 0));
+    auto ele_true = orbit3d::getElements();
+    ele_true[5] = crtbp::mean2true(ele_true[5] * pi180, ele_true[1]) * pi_180;
+    orbit3d::setState(crtbp::elementsToRot(ele_true, 0));
+    orbit3d::setTickTime(0.15 * endt);
     jacobi0 = crtbp::jacobiConstant(orbit3d::getState());
     ;
 }
