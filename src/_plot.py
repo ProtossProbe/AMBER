@@ -2,30 +2,104 @@
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.projections import PolarAxes
+
 
 mu = 0.001
+mu_s = 1 - mu
+
+
+def wrapToPi(phi):
+    phi = phi % 360
+    for i in np.arange(phi.size):
+        if phi[i] > 180:
+            phi[i] -= 360
+    return phi
+
+
+def L_action(a):
+    return np.sqrt(a)
+
+
+def G_action(a, e):
+    return L_action(a) * np.sqrt(1 - e * e)
+
+
+def H_action(a, e, i):
+    return G_action(a, e) * np.cos(i)
+
+
+def S(a, e):
+    return L_action(a) - G_action(a, e)
+
+
+def N(a, e):
+    return -(L_action(a) + G_action(a, e))
+
+
+def Q(a, e, i):
+    return G_action(a, e) + H_action(a, e, i)
+
+
+def readElements(data):
+    return [data[:, 0], data[:, 1], data[:, 2], data[:, 3], data[:, 4],
+            data[:, 5], data[:, 6], data[:, 8]]
+
 LOCATION = "assets/_output/"
-index = 5
 
-target = LOCATION + "Ast_" + str(index) + ".txt"
-target2 = LOCATION + "A_" + str(index) + ".txt"
-data2 = np.loadtxt(target2, skiprows=4)
+fig, ax = plt.subplots()
+# a = np.linspace(0.95, 1.05, 100)
+# e = np.linspace(0, 0.2, 100)
 
-data1 = np.loadtxt(target)
-data1[:, 0] = data1[:, 0] * 1.00027
-fig1, [ax1, ax2, ax3] = plt.subplots(3, sharex=True)
+# X, Y = np.meshgrid(a, e)
+# Z = S(X, Y)
 
-ax1.plot(data1[:, 0], data1[:, 1])
-ax1.plot(data2[:, 0], data2[:, 4])
-ax1.grid(linestyle='dashed')
+# level = np.linspace(np.min(Z), np.max(Z), 10)
+# CS = ax.contourf(X, Y, Z, level)
+# cbar = plt.colorbar(CS)
 
-ax2.plot(data1[:, 0], data1[:, 2])
-ax2.plot(data2[:, 0], data2[:, 5])
-ax2.grid(linestyle='dashed')
+# print S(1, 0.01)
+for index in range(1, 3):
 
-ax3.plot(data1[:, 0], data1[:, 3])
-ax3.plot(data2[:, 0], data2[:, 6])
-ax3.grid(linestyle='dashed')
+    target = LOCATION + "Ast_" + str(index) + ".txt"
+
+    data = np.loadtxt(target)
+    [t, a, e, i, ome, Ome, M, Megno] = readElements(data)
+    N_val = N(a, e)
+    ome_b = ome - Ome
+    lam = ome_b + M
+    lam_p = t * 360
+
+    sig = wrapToPi((lam - lam_p - 2 * ome_b))
+    # sig_fast = wrapToPi(lam - lam_p)
+
+    # ax.scatter(sig, S(a, e), s=0.5, alpha=0.5)
+    ax.scatter(sig, e, s=0.5, alpha=0.5)
+    ax.grid(linestyle='dashed')
+    # ax.scatter(np.cos(sig / 180 * np.pi) * e,
+    #            np.sin(sig / 180 * np.pi) * e, s=0.5)
+
+    print S(a[0], e[0]), np.mean(N_val), sig[0]
+# ax.set_xlim(-180, 180)
+# ax.set_ylim(0, 0.015)
+# plt.plot(t, lam_p)
+
+# plt.plot(data1[:, 0], data1[:, 1])
+
+
+# fig1, [ax1, ax2, ax3] = plt.subplots(3, sharex=True)
+
+# ax1.plot(data1[:, 0], data1[:, 1])
+# ax1.plot(data2[:, 0], data2[:, 4])
+# ax1.grid(linestyle='dashed')
+
+# ax2.plot(data1[:, 0], data1[:, 2])
+# ax2.plot(data2[:, 0], data2[:, 5])
+# ax2.grid(linestyle='dashed')
+
+# ax3.plot(data1[:, 0], data1[:, 3])
+# ax3.plot(data2[:, 0], data2[:, 6])
+# ax3.grid(linestyle='dashed')
 
 
 # plt.plot(data2[:, 0], data2[:, 1])

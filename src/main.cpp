@@ -14,22 +14,45 @@ using namespace boost::numeric::odeint;
 using namespace ProbeUtility;
 
 int main(int argc, char *argv[]) {
-    string inputstring(argv[1]);
-    string infostring(argv[2]);
-    auto input = readInputFromTxt(inputstring);
-    auto info = readInfoFromTxt(infostring);
-    int number = input.size();
-    cout << "Total Number: " << number << endl;
+    string switchstring(argv[3]);
+    ifstream switchfile;
+    switchfile.open(switchstring);
 
-    double endt = info[0] * pi2, dt = info[1] / year * pi2;
-    int jump = info[2];
-
+    char swi;
     crtbp system;
-    orbit3d *orbits = new orbit3d[MAX_NUMBER];
-    for (size_t i = 0; i < number; i++) {
-        orbits[i].setInitial(input[i].first, dt, endt, to_string(i + 1));
+    switchfile >> swi;
+    switch (swi) {
+    case '1': {
+        cout << "Execute Programm 1: Numerical Integration" << endl;
+        string inputstring(argv[1]);
+        string infostring(argv[2]);
+        auto input = readInputFromTxt(inputstring);
+        auto info = readInfoFromTxt(infostring);
+        int number = input.size();
+        cout << "Total Number: " << number << endl;
+
+        double endt = info[0] * pi2, dt = info[1] / year * pi2;
+        int jump = info[2];
+
+        orbit3d *orbits = new orbit3d[MAX_NUMBER];
+        for (size_t i = 0; i < number; i++) {
+            orbits[i].setInitial(input[i].first, dt, endt, to_string(i + 1));
+        }
+        double start = omp_get_wtime();
+        system.inteNbody(orbits, number, endt, jump);
+        cout << "Time: " << omp_get_wtime() - start << endl;
+        break;
     }
-    double start = omp_get_wtime();
-    system.inteNbody(orbits, number, endt, jump);
-    cout << "Time: " << omp_get_wtime() - start << endl;
+
+    case '2':
+        cout << "Execute Programm 2: Generate Averaged Hamiltonian" << endl;
+        double N_val;
+        switchfile >> N_val;
+        cout << "N constant is: " << N_val << endl << endl;
+        ;
+        system.genHamiltonian(N_val);
+        break;
+    }
+
+    switchfile.close();
 }

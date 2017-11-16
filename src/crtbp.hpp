@@ -210,6 +210,16 @@ struct observer {
     }
 };
 
+struct observer_default {
+    void operator()(const vec6 &x, double t) {
+        std::cout << "Time: " << t << '\t';
+        for (auto var : x) {
+            std::cout << "State: " << var << '\t';
+        }
+        std::cout << std::endl;
+    }
+};
+
 class crtbp {
   public:
     crtbp() = default;
@@ -222,6 +232,7 @@ class crtbp {
     static double jacobiConstant(const vec6 &x);
     static void eqOfMotion(const vec6 &x, vec6 &dxdt);
     static void eqOfVariation(const vec6 &x, vec6 &dxdt, const vec6 &p);
+    static void eqOfTwoBody(const vec6 &x, vec6 &dxdt);
     static vec6 elementsToState(const vec6 &in);
     static vec6 stateToElements(const vec6 &in, const char option = 'f');
     static vec6 inertialToRot(const vec6 &x, const double t);
@@ -229,6 +240,11 @@ class crtbp {
     static vec6 elementsToRot(const vec6 &x, const double t);
     static double mean2true(double M, double e);
     static double true2mean(double theta, double e);
+    static double averageHamiltonian(const vec6 ele, const double period,
+                                     const double dtt, const char option);
+    static vec3 calDisturb(const double N, const double S, const double sigma);
+    static void genHamiltonian(const double N);
+    static double genH0(const double N, const double S, const double Sz);
 
   private:
     class crtbp_ode {
@@ -241,8 +257,18 @@ class crtbp {
         void operator()(const vec12 &x, vec12 &dxdt, double t);
     };
 
+    class crtbp_two_body {
+      public:
+        void operator()(const vec6 &x, vec6 &dxdt, double t);
+    };
+
     static double keplerIteration(double E, double e, double M);
     static vec6 uxxMatrix(const vec3 &x);
+
+    static double disturbFunc(const vec3 &v, const vec3 &r1);
+    static bool isCross(const double y, const double y_last, const char option);
+    static bool isPeri(const double vr, const double vr_last);
+    static double radialVel(const vec6 &v);
 };
 
 static std::vector<std::pair<vec6, std::string>>

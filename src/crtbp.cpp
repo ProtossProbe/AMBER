@@ -17,6 +17,10 @@ void crtbp::crtbp_ode::operator()(const vec6 &x, vec6 &dxdt, double t) {
     crtbp::eqOfMotion(x, dxdt);
 }
 
+void crtbp::crtbp_two_body::operator()(const vec6 &x, vec6 &dxdt, double t) {
+    crtbp::eqOfTwoBody(x, dxdt);
+}
+
 void crtbp::crtbp_ode_variation::operator()(const vec12 &x, vec12 &dxdt,
                                             double t) {
     vec6 x1 = {{x[0], x[1], x[2], x[3], x[4], x[5]}};
@@ -47,6 +51,21 @@ void crtbp::eqOfMotion(const vec6 &x, vec6 &dxdt) {
     dxdt[5] = -muu * x3 * r1 - mu * x3 * r2;
 }
 
+void crtbp::eqOfTwoBody(const vec6 &x, vec6 &dxdt) {
+    double x1 = x[0], x2 = x[1], x3 = x[2], x4 = x[3], x5 = x[4], x6 = x[5];
+    double r1;
+    double x22 = x2 * x2, x33 = x3 * x3;
+    r1 = sqrt(pow(x1, 2) + x22 + x33);
+    r1 = 1 / pow(r1, 3);
+
+    dxdt[0] = x4;
+    dxdt[1] = x5;
+    dxdt[2] = x6;
+    dxdt[3] = -x1 * r1 + x1 + 2 * x5;
+    dxdt[4] = -x2 * r1 + x2 - 2 * x4;
+    dxdt[5] = -x3 * r1;
+}
+
 void crtbp::eqOfVariation(const vec6 &x, vec6 &dxdt, const vec6 &p) {
     double x1 = x[0], x2 = x[1], x3 = x[2], x4 = x[3], x5 = x[4], x6 = x[5];
     vec6 ux = crtbp::uxxMatrix({{p[0], p[1], p[2]}});
@@ -75,7 +94,8 @@ void crtbp::inteSingleAdaptive(orbit3d &orbit, double endtime, size_t jump) {
     crtbp_ode_variation eq;
     bulirsch_stoer<vec12> stepper(1e-12, 1e-12, orbit.dt, orbit.dt);
     // runge_kutta_dopri5<vec12> stepper_const;
-    // auto stepper = make_controlled(1e-12, 1e-12, orbit.dt, stepper_const);
+    // auto stepper = make_controlled(1e-12, 1e-12, orbit.dt,
+    // stepper_const);
     orbit.setOutputFile();
     cout << "Start: " << orbit.getName() << endl;
     try {
@@ -119,7 +139,7 @@ void crtbp::inteSingle(orbit3d &orbit, double endtime, size_t jump) {
 }
 
 void crtbp::inteNbody(orbit3d orbits[], size_t n, double endtime, size_t jump) {
-    summary.open(GLOBAL_LOCATION + "summary.out");
+    summary.open(GLOBAL_OUTPUT_LOCATION + "summary.out");
 #pragma omp parallel for schedule(dynamic, 4) num_threads(6)
     for (size_t i = 0; i < n; i++) {
         crtbp::inteSingleAdaptive(orbits[i], endtime, jump);
@@ -348,6 +368,120 @@ double crtbp::mean2true(double M, double e) {
 
 double crtbp::keplerIteration(double E, double e, double M) {
     return -(E - e * sin(E) - M) / (1 - e * cos(E));
+}
+
+double crtbp::disturbFunc(const vec3 &v, const vec3 &r1) {
+    vec3 delta = {{v[0] - r1[0], v[1] - r1[1], v[2] - r1[2]}};
+    double r1_norm = vecNorm(r1);
+    double delta_norm = vecNorm(delta);
+    if (delta_norm == 0 or r1_norm == 0) {
+        return numeric_limits<double>::infinity();
+    } else {
+        return 1 / delta_norm - vecDot(v, r1) / pow(r1_norm, 3);
+    }
+}
+
+double crtbp::averageHamiltonian(const vec6 ele, const double period,
+                                 const double dtt, const char option) {
+    double result = 0;
+    double t_now = 0;
+    double disturb;
+    auto vec = crtbp::elementsToRot(ele, 0);
+    crtbp::crtbp_two_body eq;
+    runge_kutta_dopri5<vec6> stepper;
+
+    size_t count = 0;
+    // ofstream printfile;
+    // printfile.open(GLOBAL_OUTPUT_LOCATION + "print.txt");
+
+    while (t_now < period) {
+        disturb =
+            crtbp::disturbFunc({{vec[0], vec[1], vec[2]}}, {{1 - mu, 0, 0}});
+        // printfile << t_now << '\t' << setprecision(10) << vec[0] << '\t'
+        //           << vec[1] << '\t' << vec[2] << '\t' << disturb << endl;
+        result += disturb;
+        stepper.do_step(eq, vec, 0.0, dtt);
+
+        count++;
+        t_now += dtt;
+    }
+    return result / count * mu;
+}
+
+bool crtbp::isCross(const double y, const double y_last, const char option) {
+    if (option == 'p')
+        return (y_last < 0) and (y > 0);
+    if (option == 'r')
+        return (y_last > 0) and (y < 0);
+    return false;
+}
+bool crtbp::isPeri(const double vr, const double vr_last) {
+    return (vr_last < 0) and (vr >= 0);
+}
+double crtbp::radialVel(const vec6 &v) {
+    vec3 pos = {{v[0], v[1], v[2]}};
+    vec3 vel = {{v[3], v[4], v[5]}};
+    return vecDot(pos, vel);
+}
+
+vec3 crtbp::calDisturb(const double N, const double S, const double sigma) {
+    // 1/-1 resonance
+    double B = S + N;
+    double C = S - N;
+    double a = pow(C / 2, 2);
+    double e = sqrt(1 - pow(B / C, 2));
+
+    // 2/1 resonance
+    // double B = N - S;
+    // double C = N - 2 * S;
+    // double a = pow(B, 2);
+    // double e = sqrt(1 - pow(C / B, 2));
+    if (e < 0 or e >= 1) {
+        return {{0, 0, 0}};
+    }
+
+    // 1/-1 resonance
+    double T1 = 1 / (sqrt(1 / pow(a, 3)) + 1) * pi2 * 2;
+    // double T2 = sqrt(pow(a, 3)) * pi2;
+    double T = T1;
+    // T = pi2;
+    double omega = -2 * sigma;
+
+    // 2/1 resonance
+    // double T = 1 / (sqrt(1 / pow(a, 3)) - 1) * pi2;
+    // double omega = -sigma;
+    double f = crtbp::mean2true(-omega * pi180, e) * pi_180;
+    vec6 ele = {{a, e, 180, omega, 0, 0}};
+    return {{crtbp::averageHamiltonian(ele, T, 0.005, 'r'), a, e}};
+}
+
+void crtbp::genHamiltonian(const double N) {
+    double S_min = 0;
+    double S_max = 0.1;
+    double dS = 0.0001;
+    double H0;
+    vec3 result;
+    ofstream output;
+    output.open(GLOBAL_OUTPUT_LOCATION + "disturb.txt");
+    for (double S = S_min; S <= S_max; S += dS) {
+        cout << "S: " << S << endl;
+        H0 = crtbp::genH0(N, S, 0);
+        for (double sig = -180; sig <= 180; sig += 2) {
+            result = crtbp::calDisturb(N, S, sig);
+            output << setprecision(10) << result[0] << '\t' << H0 << '\t'
+                   << result[1] << '\t' << result[2] << endl;
+        }
+    }
+    output.close();
+}
+
+double crtbp::genH0(const double N, const double S, const double Sz) {
+    // 1 / -1 resonance
+    double val = S - N + Sz;
+    return -2 / pow(val, 2) - val / 2;
+
+    // double val = N - S - Sz;
+    // return -1 / (2 * pow(val, 2)) - 2 * val;
 }
 
 void orbit3d::updateInerState() {

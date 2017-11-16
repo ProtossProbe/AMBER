@@ -6,7 +6,8 @@
         "request": "launch",
         "program": "${workspaceRoot}/main",
         "args": ["assets/input.in",
-            "assets/info.in"
+            "assets/info.in",
+            "assets/switch.in"
         ],
         "stopAtEntry": false,
         "cwd": "${workspaceRoot}",

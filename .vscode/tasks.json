@@ -18,7 +18,8 @@
             "command": "./main",
             "args": [
                 "assets/input.in",
-                "assets/info.in"
+                "assets/info.in",
+                "assets/switch.in"
             ],
             "group": {
                 "kind": "test",
