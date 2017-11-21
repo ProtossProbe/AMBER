@@ -266,7 +266,8 @@ class crtbp {
     static vec6 uxxMatrix(const vec3 &x);
 
     static double disturbFunc(const vec3 &v, const vec3 &r1);
-    static bool isCross(const double y, const double y_last, const char option);
+    static bool isCross(const vec6 &vec_ref, const vec6 &vec,
+                        const vec6 &vec_last);
     static bool isPeri(const double vr, const double vr_last);
     static double radialVel(const vec6 &v);
 };

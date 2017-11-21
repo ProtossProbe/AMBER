@@ -386,7 +386,13 @@ double crtbp::averageHamiltonian(const vec6 ele, const double period,
     double result = 0;
     double t_now = 0;
     double disturb;
-    auto vec = crtbp::elementsToRot(ele, 0);
+
+    vec6 vec = crtbp::elementsToRot(ele, 0);
+    vec6 vec0 = vec;
+    vec6 vec_last;
+
+    size_t flag = 0;
+
     crtbp::crtbp_two_body eq;
     runge_kutta_dopri5<vec6> stepper;
 
@@ -394,7 +400,8 @@ double crtbp::averageHamiltonian(const vec6 ele, const double period,
     // ofstream printfile;
     // printfile.open(GLOBAL_OUTPUT_LOCATION + "print.txt");
 
-    while (t_now < period) {
+    while (flag != 4) {
+        vec_last = vec;
         disturb =
             crtbp::disturbFunc({{vec[0], vec[1], vec[2]}}, {{1 - mu, 0, 0}});
         // printfile << t_now << '\t' << setprecision(10) << vec[0] << '\t'
@@ -404,16 +411,18 @@ double crtbp::averageHamiltonian(const vec6 ele, const double period,
 
         count++;
         t_now += dtt;
+        if (isCross(vec0, vec, vec_last)) {
+            flag++;
+        }
     }
     return result / count * mu;
 }
 
-bool crtbp::isCross(const double y, const double y_last, const char option) {
-    if (option == 'p')
-        return (y_last < 0) and (y > 0);
-    if (option == 'r')
-        return (y_last > 0) and (y < 0);
-    return false;
+bool crtbp::isCross(const vec6 &vec_ref, const vec6 &vec,
+                    const vec6 &vec_last) {
+    double cross_last = vec_last[0] * vec_ref[1] - vec_last[1] * vec_ref[0];
+    double cross_now = vec_ref[0] * vec[1] - vec_ref[1] * vec[0];
+    return cross_last * cross_now > 0;
 }
 bool crtbp::isPeri(const double vr, const double vr_last) {
     return (vr_last < 0) and (vr >= 0);
@@ -452,21 +461,21 @@ vec3 crtbp::calDisturb(const double N, const double S, const double sigma) {
     // double omega = -sigma;
     double f = crtbp::mean2true(-omega * pi180, e) * pi_180;
     vec6 ele = {{a, e, 180, omega, 0, 0}};
-    return {{crtbp::averageHamiltonian(ele, T, 0.005, 'r'), a, e}};
+    return {{crtbp::averageHamiltonian(ele, T, 0.002, 'r'), a, e}};
 }
 
 void crtbp::genHamiltonian(const double N) {
     double S_min = 0;
     double S_max = 0.1;
-    double dS = 0.0001;
+    double dS = 0.0002;
     double H0;
     vec3 result;
     ofstream output;
-    output.open(GLOBAL_OUTPUT_LOCATION + "disturb.txt");
+    output.open(GLOBAL_OUTPUT_LOCATION + "disturb.txt" + to_string(N));
     for (double S = S_min; S <= S_max; S += dS) {
         cout << "S: " << S << endl;
         H0 = crtbp::genH0(N, S, 0);
-        for (double sig = -180; sig <= 180; sig += 2) {
+        for (double sig = -180; sig <= 180; sig += 1) {
             result = crtbp::calDisturb(N, S, sig);
             output << setprecision(10) << result[0] << '\t' << H0 << '\t'
                    << result[1] << '\t' << result[2] << endl;

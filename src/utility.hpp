@@ -76,6 +76,10 @@ template <class T> inline void vecPrint(const T &v1) {
     return;
 }
 
+template <class T> inline double vecAngle(const T &v) {
+    return atan2(v[1], v[0]);
+}
+
 } // namespace ProbeUtility
 
 #endif

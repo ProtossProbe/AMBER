@@ -26,15 +26,15 @@ def G_action(a, e):
 
 
 def H_action(a, e, i):
-    return G_action(a, e) * np.cos(i)
+    return G_action(a, e) * np.cos(i / 180 * np.pi)
 
 
-def S(a, e):
+def S(a, e, i):
     return L_action(a) - G_action(a, e)
 
 
-def N(a, e):
-    return -(L_action(a) + G_action(a, e))
+def N(a, e, i):
+    return -L_action(a) + H_action(a, e, i)
 
 
 def Q(a, e, i):
@@ -59,29 +59,29 @@ fig, ax = plt.subplots()
 # cbar = plt.colorbar(CS)
 
 # print S(1, 0.01)
-for index in range(1, 3):
-
+for index in range(1, 2):
     target = LOCATION + "Ast_" + str(index) + ".txt"
 
     data = np.loadtxt(target)
     [t, a, e, i, ome, Ome, M, Megno] = readElements(data)
-    N_val = N(a, e)
+    N_val = N(a, e, i)
     ome_b = ome - Ome
     lam = ome_b + M
     lam_p = t * 360
 
-    sig = wrapToPi((lam - lam_p - 2 * ome_b))
+    sig1 = wrapToPi((lam - lam_p - 2 * ome_b))
+    sig2 = wrapToPi((lam - lam_p + 2 * Ome))
     # sig_fast = wrapToPi(lam - lam_p)
-
-    # ax.scatter(sig, S(a, e), s=0.5, alpha=0.5)
-    ax.scatter(sig, e, s=0.5, alpha=0.5)
+    ax.scatter(t[7190:21980], L_action(a)[7190:21980], s=0.5, alpha=0.5)
+    # ax.scatter(t, i, s=0.5, alpha=0.5)
+    # ax.scatter(t, sig / 180 * np.pi, s=0.5, alpha=0.5)
     ax.grid(linestyle='dashed')
     # ax.scatter(np.cos(sig / 180 * np.pi) * e,
     #            np.sin(sig / 180 * np.pi) * e, s=0.5)
 
-    print S(a[0], e[0]), np.mean(N_val), sig[0]
+    print S(a[0], e[0], i[0]), np.mean(N_val), sig1[0]
 # ax.set_xlim(-180, 180)
-# ax.set_ylim(0, 0.015)
+# ax.set_ylim(0, 0.04)
 # plt.plot(t, lam_p)
 
 # plt.plot(data1[:, 0], data1[:, 1])
