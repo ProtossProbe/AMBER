@@ -30,7 +30,8 @@ template <class T> inline double vecNorm(const T &v) {
 
 template <class T> inline double vecDot(const T &v1, const T &v2) {
     double result = 0;
-    for (int i = 0; i < v1.size(); i++)
+    size_t size = v1.size();
+    for (size_t i = 0; i < size; i++)
         result += v1[i] * v2[i];
     return result;
 }

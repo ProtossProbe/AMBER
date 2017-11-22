@@ -9,19 +9,13 @@
 #ifndef _CRTBP_HPP_
 #define _CRTBP_HPP_
 
-#include "crtbp.hpp"
 #include "utility.hpp"
 #include <boost/array.hpp>
-#include <boost/foreach.hpp>
 #include <boost/numeric/odeint.hpp>
-#include <exception>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <libiomp/omp.h>
-#include <math.h>
-#include <string>
-#include <utility>
-#include <vector>
 
 // define some handy constants
 const double pi = M_PI;
@@ -171,8 +165,7 @@ class orbit3d {
 
 static void printInteData(orbit3d &orb) {
     std::cout << "State:  ";
-    double j;
-    BOOST_FOREACH (j, orb.getPos())
+    for (double j : orb.getPos())
         std::cout << std::setw(12) << j << " ";
     std::cout << "  |   "
               << "Time: " << std::setw(6) << orb.getTime()
@@ -184,8 +177,7 @@ static void printInteData(orbit3d &orb) {
 
 static void writeInteData(orbit3d &orb) {
     orb.outputfile << std::setw(8) << orb.getTimeYear() << '\t';
-    double j;
-    BOOST_FOREACH (j, orb.getElements())
+    for (double j : orb.getElements())
         orb.outputfile << std::setw(10) << j << '\t';
     orb.outputfile << std::setw(10) << orb.getJacobiError() << '\t'
                    << std::setw(10) << orb.getMEGNO() << std::endl;
@@ -240,11 +232,8 @@ class crtbp {
     static vec6 elementsToRot(const vec6 &x, const double t);
     static double mean2true(double M, double e);
     static double true2mean(double theta, double e);
-    static double averageHamiltonian(const vec6 ele, const double period,
-                                     const double dtt, const char option);
-    static vec3 calDisturb(const double N, const double S, const double sigma);
-    static void genHamiltonian(const double N);
-    static double genH0(const double N, const double S, const double Sz);
+    static void singleAverage(const double N);
+    static void doubleAverage(const double H, const double a);
 
   private:
     class crtbp_ode {
@@ -266,17 +255,22 @@ class crtbp {
     static vec6 uxxMatrix(const vec3 &x);
 
     static double disturbFunc(const vec3 &v, const vec3 &r1);
+    static double ringDisturb(const vec3 &v, const double ap);
+    static double genH0(const double N, const double S, const double Sz);
+    static double calSingleAve(const double N, const double S,
+                               const double sigma);
+    static double calDoubleAve(const double H, const double a, const double e,
+                               const double g);
     static bool isCross(const vec6 &vec_ref, const vec6 &vec,
                         const vec6 &vec_last);
     static bool isPeri(const double vr, const double vr_last);
     static double radialVel(const vec6 &v);
 };
 
-static std::vector<std::pair<vec6, std::string>>
-readInputFromTxt(const std::string &inputstring) {
+static std::vector<vec6> readInputFromTxt(const std::string &inputstring) {
     std::ifstream inputfile;
     inputfile.open(inputstring);
-    std::vector<std::pair<vec6, std::string>> inputmatrix;
+    std::vector<vec6> inputmatrix;
     std::string name;
     vec6 inputarray;
     if (inputfile.is_open()) {
@@ -284,9 +278,7 @@ readInputFromTxt(const std::string &inputstring) {
             for (size_t i = 0; i < 6; i++) {
                 inputfile >> inputarray[i];
             }
-            inputfile >> name;
-
-            inputmatrix.push_back(std::make_pair(inputarray, name));
+            inputmatrix.push_back(inputarray);
         }
     }
     return inputmatrix;

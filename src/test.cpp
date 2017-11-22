@@ -1,10 +1,10 @@
-#include "crtbp.hpp"
 
-using namespace std;
-using namespace ProbeUtility;
-
-int main(int argc, char *argv[]) {
-    vec6 test = {{-270, -180, -90, 45, 330, 450}};
-    vec6 temp;
-    vecMultiply(temp, test, pi180);
+#include <cmath>
+#include <iostream>
+int main() {
+    double hpi = std::acos(-1) / 2;
+    std::cout << "K(0) = " << std::comp_ellint_1(0) << '\n'
+              << "π/2 = " << hpi << '\n'
+              << "K(0.5) = " << std::comp_ellint_1(0.5) << '\n'
+              << "F(0.5, π/2) = " << std::ellint_1(0.5, hpi) << '\n';
 }

@@ -64,7 +64,7 @@ for index in range(1, 2):
 
     data = np.loadtxt(target)
     [t, a, e, i, ome, Ome, M, Megno] = readElements(data)
-    N_val = N(a, e, i)
+    H_val = H_action(a, e, i)
     ome_b = ome - Ome
     lam = ome_b + M
     lam_p = t * 360
@@ -72,14 +72,15 @@ for index in range(1, 2):
     sig1 = wrapToPi((lam - lam_p - 2 * ome_b))
     sig2 = wrapToPi((lam - lam_p + 2 * Ome))
     # sig_fast = wrapToPi(lam - lam_p)
-    ax.scatter(t[7190:21980], L_action(a)[7190:21980], s=0.5, alpha=0.5)
+    ax.scatter(t, H_action(a, e, i), s=0.5, alpha=0.5)
+    # ax.scatter(t, ome, s=0.5, alpha=0.5)
     # ax.scatter(t, i, s=0.5, alpha=0.5)
     # ax.scatter(t, sig / 180 * np.pi, s=0.5, alpha=0.5)
     ax.grid(linestyle='dashed')
     # ax.scatter(np.cos(sig / 180 * np.pi) * e,
     #            np.sin(sig / 180 * np.pi) * e, s=0.5)
 
-    print S(a[0], e[0], i[0]), np.mean(N_val), sig1[0]
+    print S(a[0], e[0], i[0]), np.mean(H_val), sig1[0]
 # ax.set_xlim(-180, 180)
 # ax.set_ylim(0, 0.04)
 # plt.plot(t, lam_p)

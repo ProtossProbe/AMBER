@@ -1,12 +1,12 @@
 {
     "version": "2.0.0",
     "tasks": [{
-            "taskName": "compile",
+            "label": "compile",
             "type": "shell",
-            "command": "clang-omp++",
+            "command": "g++-7",
             "args": [
                 "-g",
-                "-fopenmp -std=c++1z -Wall -Wno-missing-braces -Wno-unused-variable -Wno-unused-parameter -Wno-unused-function -pthread src/main.cpp src/crtbp.cpp -o main"
+                "-fopenmp -std=c++17 -Wall -Wno-unused-variable -Wno-unused-function src/crtbp.cpp src/main.cpp -o main"
             ],
             "group": {
                 "kind": "build",
@@ -14,7 +14,7 @@
             }
         },
         {
-            "taskName": "run",
+            "label": "run",
             "command": "./main",
             "args": [
                 "assets/input.in",
@@ -27,7 +27,7 @@
             }
         },
         {
-            "taskName": "clean",
+            "label": "clean",
             "command": "rm",
             "args": [
                 "assets/*.txt"

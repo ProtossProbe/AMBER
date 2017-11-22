@@ -120,7 +120,6 @@ void crtbp::writeSummary(orbit3d &orbit) {
 void crtbp::inteSingle(orbit3d &orbit, double endtime, size_t jump) {
     crtbp_ode_variation eq;
     runge_kutta_dopri5<vec12> stepper;
-    auto stepper_controlled = make_controlled(1e-12, 1e-12, orbit.dt, stepper);
 
     orbit.setOutputFile();
     cout << "Start: " << orbit.getName() << endl;
@@ -308,8 +307,7 @@ vec6 crtbp::stateToElements(const vec6 &in, const char option) {
 }
 
 vec6 crtbp::inertialToRot(const vec6 &x, const double t) {
-    double c = cos(t);
-    double s = sin(t);
+    double c = cos(t), s = sin(t);
     vec6 result;
     result[0] = c * x[0] + s * x[1];
     result[1] = -s * x[0] + c * x[1];
@@ -322,8 +320,7 @@ vec6 crtbp::inertialToRot(const vec6 &x, const double t) {
 }
 
 vec6 crtbp::rotToInertial(const vec6 &x, const double t) {
-    double c = cos(t);
-    double s = sin(t);
+    double c = cos(t), s = sin(t);
     double x0 = x[0] + mu;
     vec6 result;
     result[0] = c * x0 - s * x[1];
@@ -370,54 +367,6 @@ double crtbp::keplerIteration(double E, double e, double M) {
     return -(E - e * sin(E) - M) / (1 - e * cos(E));
 }
 
-double crtbp::disturbFunc(const vec3 &v, const vec3 &r1) {
-    vec3 delta = {{v[0] - r1[0], v[1] - r1[1], v[2] - r1[2]}};
-    double r1_norm = vecNorm(r1);
-    double delta_norm = vecNorm(delta);
-    if (delta_norm == 0 or r1_norm == 0) {
-        return numeric_limits<double>::infinity();
-    } else {
-        return 1 / delta_norm - vecDot(v, r1) / pow(r1_norm, 3);
-    }
-}
-
-double crtbp::averageHamiltonian(const vec6 ele, const double period,
-                                 const double dtt, const char option) {
-    double result = 0;
-    double t_now = 0;
-    double disturb;
-
-    vec6 vec = crtbp::elementsToRot(ele, 0);
-    vec6 vec0 = vec;
-    vec6 vec_last;
-
-    size_t flag = 0;
-
-    crtbp::crtbp_two_body eq;
-    runge_kutta_dopri5<vec6> stepper;
-
-    size_t count = 0;
-    // ofstream printfile;
-    // printfile.open(GLOBAL_OUTPUT_LOCATION + "print.txt");
-
-    while (flag != 4) {
-        vec_last = vec;
-        disturb =
-            crtbp::disturbFunc({{vec[0], vec[1], vec[2]}}, {{1 - mu, 0, 0}});
-        // printfile << t_now << '\t' << setprecision(10) << vec[0] << '\t'
-        //           << vec[1] << '\t' << vec[2] << '\t' << disturb << endl;
-        result += disturb;
-        stepper.do_step(eq, vec, 0.0, dtt);
-
-        count++;
-        t_now += dtt;
-        if (isCross(vec0, vec, vec_last)) {
-            flag++;
-        }
-    }
-    return result / count * mu;
-}
-
 bool crtbp::isCross(const vec6 &vec_ref, const vec6 &vec,
                     const vec6 &vec_last) {
     double cross_last = vec_last[0] * vec_ref[1] - vec_last[1] * vec_ref[0];
@@ -433,7 +382,7 @@ double crtbp::radialVel(const vec6 &v) {
     return vecDot(pos, vel);
 }
 
-vec3 crtbp::calDisturb(const double N, const double S, const double sigma) {
+double crtbp::calSingleAve(const double N, const double S, const double sigma) {
     // 1/-1 resonance
     double B = S + N;
     double C = S - N;
@@ -446,42 +395,100 @@ vec3 crtbp::calDisturb(const double N, const double S, const double sigma) {
     // double a = pow(B, 2);
     // double e = sqrt(1 - pow(C / B, 2));
     if (e < 0 or e >= 1) {
-        return {{0, 0, 0}};
+        return 0;
     }
 
-    // 1/-1 resonance
-    double T1 = 1 / (sqrt(1 / pow(a, 3)) + 1) * pi2 * 2;
-    // double T2 = sqrt(pow(a, 3)) * pi2;
-    double T = T1;
-    // T = pi2;
     double omega = -2 * sigma;
+    double T = pi2;
+    size_t num = 720;
+    double incr = pi2 / num, incrt = T / num, M = 0, f = 0, disturb = 0, t = 0;
 
-    // 2/1 resonance
-    // double T = 1 / (sqrt(1 / pow(a, 3)) - 1) * pi2;
-    // double omega = -sigma;
-    double f = crtbp::mean2true(-omega * pi180, e) * pi_180;
-    vec6 ele = {{a, e, 180, omega, 0, 0}};
-    return {{crtbp::averageHamiltonian(ele, T, 0.002, 'r'), a, e}};
+    vec6 ele, vec;
+    for (size_t i = 0; i < num; i++) {
+        f = crtbp::mean2true(M, e) * pi_180;
+        ele = {{a, e, 180, omega, 0, f}};
+        vec = crtbp::elementsToRot(ele, t);
+        disturb +=
+            crtbp::disturbFunc({{vec[0], vec[1], vec[2]}}, {{1 - mu, 0, 0}});
+        t += incrt;
+        M += incr;
+    }
+    return mu * disturb / num;
 }
 
-void crtbp::genHamiltonian(const double N) {
-    double S_min = 0;
-    double S_max = 0.1;
-    double dS = 0.0002;
-    double H0;
-    vec3 result;
+void crtbp::singleAverage(const double N) {
     ofstream output;
-    output.open(GLOBAL_OUTPUT_LOCATION + "disturb.txt" + to_string(N));
+    output.open(GLOBAL_OUTPUT_LOCATION + "SingleAve_" + to_string(N) + ".txt");
+
+    double S_min = 0, S_max = 0.04, dS = 0.0002;
+    double H0, result;
     for (double S = S_min; S <= S_max; S += dS) {
         cout << "S: " << S << endl;
         H0 = crtbp::genH0(N, S, 0);
         for (double sig = -180; sig <= 180; sig += 1) {
-            result = crtbp::calDisturb(N, S, sig);
-            output << setprecision(10) << result[0] << '\t' << H0 << '\t'
-                   << result[1] << '\t' << result[2] << endl;
+            result = crtbp::calSingleAve(N, S, sig);
+            output << setprecision(10) << result << '\t' << H0 << endl;
+        }
+    }
+
+    output.close();
+}
+
+double crtbp::calDoubleAve(const double H, const double a, const double e,
+                           const double g) {
+    double I = acos(H / sqrt(a * (1 - e * e))) * pi_180;
+    double T = pi2;
+    size_t num = 720;
+    double incr = pi2 / num, incrt = T / num, M = 0, f = 0, disturb = 0, t = 0;
+    vec6 ele, vec;
+    for (size_t i = 0; i < num; i++) {
+        f = crtbp::mean2true(M, e) * pi_180;
+        ele = {{a, e, I, g, 0, f}};
+        vec = crtbp::elementsToRot(ele, t);
+        disturb += crtbp::ringDisturb({{vec[0], vec[1], vec[2]}}, 1);
+        t += incrt;
+        M += incr;
+    }
+    return mu * disturb / num / pi2;
+}
+
+void crtbp::doubleAverage(const double H, const double a) {
+    ofstream output;
+    output.open(GLOBAL_OUTPUT_LOCATION + "DoubleAve_" + to_string(H) + ".txt");
+    int e_m = sqrt(1 - H * H / a) * 100;
+    double e_min = 0, e_max = e_m / 100.0, de = 0.001;
+    cout << "emax: " << e_max << endl;
+    double result;
+    for (double e = e_min; e <= e_max; e += de) {
+        cout << "e: " << e << endl;
+        for (double g = 0; g <= 360; g += 1) {
+            result = calDoubleAve(H, a, e, g);
+            output << setprecision(10) << result << endl;
         }
     }
     output.close();
+}
+
+double crtbp::ringDisturb(const vec3 &v, const double ap) {
+    double xr = sqrt(v[0] * v[0] + v[1] * v[1]), z2 = v[2]*v[2];
+    double p2 = pow(xr + ap, 2) + z2, q2 = pow(xr - ap, 2) + z2;
+    double p = sqrt(p2);
+    double k = 1 - q2 / p2;
+    if (k >= 1) {
+        return numeric_limits<double>::infinity();
+    }
+    return 4 / p * comp_ellint_1(k);
+}
+
+double crtbp::disturbFunc(const vec3 &v, const vec3 &r1) {
+    vec3 delta = {{v[0] - r1[0], v[1] - r1[1], v[2] - r1[2]}};
+    double r1_norm = vecNorm(r1);
+    double delta_norm = vecNorm(delta);
+    if (delta_norm == 0 or r1_norm == 0) {
+        return numeric_limits<double>::infinity();
+    } else {
+        return 1 / delta_norm - vecDot(v, r1) / pow(r1_norm, 3);
+    }
 }
 
 double crtbp::genH0(const double N, const double S, const double Sz) {
