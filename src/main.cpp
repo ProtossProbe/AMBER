@@ -47,11 +47,15 @@ int main(int argc, char *argv[]) {
     case '2':
         cout << "Execute Programm 2: Generate Single Averaged Hamiltonian"
              << endl;
-        double N_val;
-        switchfile >> N_val;
-        cout << "N constant is: " << N_val << endl << endl;
-        ;
-        system.singleAverage(N_val);
+        double N, Sz, S_max;
+        size_t n;
+        switchfile >> N;
+        switchfile >> Sz;
+        switchfile >> S_max;
+        switchfile >> n;
+        cout << "N constant is: " << N << endl << endl;
+        cout << "Sz is: " << Sz << endl << endl;
+        system.singleAverage(N, Sz, S_max, n);
         break;
     case '3':
         cout << "Execute Programm 2: Generate Double Averaged Hamiltonian"
@@ -59,7 +63,7 @@ int main(int argc, char *argv[]) {
         double H_val, a;
         switchfile >> H_val;
         switchfile >> a;
-        cout << "N constant is: " << N_val << endl;
+        cout << "H constant is: " << H_val << endl;
         cout << "a is: " << a << endl << endl;
         ;
         system.doubleAverage(H_val, a);

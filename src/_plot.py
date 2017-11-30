@@ -9,12 +9,16 @@ mu = 0.001
 mu_s = 1 - mu
 
 
-def wrapToPi(phi):
+def wrapTo180(phi):
     phi = phi % 360
     for i in np.arange(phi.size):
         if phi[i] > 180:
             phi[i] -= 360
     return phi
+
+
+def wrapTo360(phi):
+    return phi % 360
 
 
 def L_action(a):
@@ -48,6 +52,7 @@ def readElements(data):
 LOCATION = "assets/_output/"
 
 fig, ax = plt.subplots()
+fig2, ax2 = plt.subplots()
 # a = np.linspace(0.95, 1.05, 100)
 # e = np.linspace(0, 0.2, 100)
 
@@ -64,23 +69,27 @@ for index in range(1, 2):
 
     data = np.loadtxt(target)
     [t, a, e, i, ome, Ome, M, Megno] = readElements(data)
-    H_val = H_action(a, e, i)
+    H = H_action(a, e, i)
     ome_b = ome - Ome
     lam = ome_b + M
     lam_p = t * 360
 
-    sig1 = wrapToPi((lam - lam_p - 2 * ome_b))
-    sig2 = wrapToPi((lam - lam_p + 2 * Ome))
+    sig1 = wrapTo180((lam - lam_p - 2 * ome_b))
+    sig2 = wrapTo180((lam - lam_p + 2 * Ome))
     # sig_fast = wrapToPi(lam - lam_p)
-    ax.scatter(t, H_action(a, e, i), s=0.5, alpha=0.5)
+    ax.scatter(ome, e, s=0.5, alpha=0.5)
+    ax2.scatter(t, sig1, s=0.5, alpha=0.5)
+    ax2.scatter(t, sig2, s=0.5, alpha=0.5)
     # ax.scatter(t, ome, s=0.5, alpha=0.5)
     # ax.scatter(t, i, s=0.5, alpha=0.5)
     # ax.scatter(t, sig / 180 * np.pi, s=0.5, alpha=0.5)
     ax.grid(linestyle='dashed')
+    # ax.set_xlim(0, 360)
+    # ax.set_ylim(0, 0.368)
     # ax.scatter(np.cos(sig / 180 * np.pi) * e,
     #            np.sin(sig / 180 * np.pi) * e, s=0.5)
 
-    print S(a[0], e[0], i[0]), np.mean(H_val), sig1[0]
+    print np.mean(a), np.mean(H), np.mean(sig1), sig1[0]
 # ax.set_xlim(-180, 180)
 # ax.set_ylim(0, 0.04)
 # plt.plot(t, lam_p)

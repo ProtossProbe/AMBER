@@ -139,7 +139,7 @@ void crtbp::inteSingle(orbit3d &orbit, double endtime, size_t jump) {
 
 void crtbp::inteNbody(orbit3d orbits[], size_t n, double endtime, size_t jump) {
     summary.open(GLOBAL_OUTPUT_LOCATION + "summary.out");
-#pragma omp parallel for schedule(dynamic, 4) num_threads(6)
+#pragma omp parallel for num_threads(6)
     for (size_t i = 0; i < n; i++) {
         crtbp::inteSingleAdaptive(orbits[i], endtime, jump);
     }
@@ -382,6 +382,23 @@ double crtbp::radialVel(const vec6 &v) {
     return vecDot(pos, vel);
 }
 
+double crtbp::inteOneCircle(const vec5 &v, const size_t num) {
+    vec6 ele, vec;
+    double a = v[0], e = v[1], I = v[2], omega = v[3], Omega = v[4];
+    double T = pi2;
+    double incr = pi2 / num, incrt = T / num, M = 0, f = 0, disturb = 0, t = 0;
+    for (size_t i = 0; i < num; i++) {
+        f = crtbp::mean2true(M, e) * pi_180;
+        ele = {{a, e, I, omega, Omega, f}};
+        vec = crtbp::elementsToRot(ele, t);
+        disturb +=
+            crtbp::dotDisturb({{vec[0], vec[1], vec[2]}}, {{1 - mu, 0, 0}});
+        t += incrt;
+        M += incr;
+    }
+    return mu * disturb / num;
+}
+
 double crtbp::calSingleAve(const double N, const double S, const double sigma) {
     // 1/-1 resonance
     double B = S + N;
@@ -398,36 +415,49 @@ double crtbp::calSingleAve(const double N, const double S, const double sigma) {
         return 0;
     }
 
-    double omega = -2 * sigma;
-    double T = pi2;
-    size_t num = 720;
-    double incr = pi2 / num, incrt = T / num, M = 0, f = 0, disturb = 0, t = 0;
-
-    vec6 ele, vec;
-    for (size_t i = 0; i < num; i++) {
-        f = crtbp::mean2true(M, e) * pi_180;
-        ele = {{a, e, 180, omega, 0, f}};
-        vec = crtbp::elementsToRot(ele, t);
-        disturb +=
-            crtbp::disturbFunc({{vec[0], vec[1], vec[2]}}, {{1 - mu, 0, 0}});
-        t += incrt;
-        M += incr;
-    }
-    return mu * disturb / num;
+    double omega = -sigma;
+    return inteOneCircle({{a, e, 180, omega, 0}}, 720);
 }
 
-void crtbp::singleAverage(const double N) {
+vec3 crtbp::getAEI(const double N, const double S, const double Sz) {
+    double a, e, I;
+    double L = (S + Sz - N) / 2;
+    e = (Sz - N - S) / (S + Sz - N);
+    I = Sz / (L * e) - 1;
+    e = sqrt(1 - e * e);
+    I = acos(I) * pi_180;
+    a = pow(L, 2);
+    return {{a, e, I}};
+}
+
+double crtbp::calSingleAve(const double N, const double S, const double Sz,
+                           const double sigma) {
+    vec3 AEI = getAEI(N, S, Sz);
+    double a = AEI[0], e = AEI[1], I = AEI[2];
+    double omega = -sigma;
+    // double a = N / (cos(I * pi180) * sqrt(1 - e * e) - 1);
+
+    return inteOneCircle({{a, e, I, omega, 0}}, 360);
+}
+
+void crtbp::singleAverage(const double N, const double Sz, const double S_max,
+                          const size_t n) {
     ofstream output;
     output.open(GLOBAL_OUTPUT_LOCATION + "SingleAve_" + to_string(N) + ".txt");
 
-    double S_min = 0, S_max = 0.04, dS = 0.0002;
-    double H0, result;
-    for (double S = S_min; S <= S_max; S += dS) {
+    double S_min = 0, dS = S_max / n;
+    double H0, result, a, e, I, omega;
+    vec3 AEI;
+    for (double S = S_min; S < S_max; S += dS) {
         cout << "S: " << S << endl;
-        H0 = crtbp::genH0(N, S, 0);
+        H0 = crtbp::genH0(N, Sz, S);
+        vec3 AEI = getAEI(N, Sz, S);
+        a = AEI[0], e = AEI[1], I = AEI[2];
+        cout << a << '\t' << e << '\t' << I << '\t' << endl << endl;
         for (double sig = -180; sig <= 180; sig += 1) {
-            result = crtbp::calSingleAve(N, S, sig);
-            output << setprecision(10) << result << '\t' << H0 << endl;
+            omega = sig;
+            result = inteOneCircle({{a, e, I, omega, 0}}, 360);
+            output << setprecision(12) << result << '\t' << H0 << endl;
         }
     }
 
@@ -437,16 +467,14 @@ void crtbp::singleAverage(const double N) {
 double crtbp::calDoubleAve(const double H, const double a, const double e,
                            const double g) {
     double I = acos(H / sqrt(a * (1 - e * e))) * pi_180;
-    double T = pi2;
-    size_t num = 720;
-    double incr = pi2 / num, incrt = T / num, M = 0, f = 0, disturb = 0, t = 0;
+    size_t num = 180;
+    double incr = pi2 / num, M = 0, f = 0, disturb = 0;
     vec6 ele, vec;
     for (size_t i = 0; i < num; i++) {
         f = crtbp::mean2true(M, e) * pi_180;
         ele = {{a, e, I, g, 0, f}};
-        vec = crtbp::elementsToRot(ele, t);
+        vec = crtbp::elementsToState(ele);
         disturb += crtbp::ringDisturb({{vec[0], vec[1], vec[2]}}, 1);
-        t += incrt;
         M += incr;
     }
     return mu * disturb / num / pi2;
@@ -456,31 +484,31 @@ void crtbp::doubleAverage(const double H, const double a) {
     ofstream output;
     output.open(GLOBAL_OUTPUT_LOCATION + "DoubleAve_" + to_string(H) + ".txt");
     int e_m = sqrt(1 - H * H / a) * 100;
-    double e_min = 0, e_max = e_m / 100.0, de = 0.001;
+    double e_min = 0, e_max = e_m / 100.0, de = 0.002;
     cout << "emax: " << e_max << endl;
     double result;
     for (double e = e_min; e <= e_max; e += de) {
         cout << "e: " << e << endl;
         for (double g = 0; g <= 360; g += 1) {
             result = calDoubleAve(H, a, e, g);
-            output << setprecision(10) << result << endl;
+            output << setprecision(12) << result << endl;
         }
     }
     output.close();
 }
 
 double crtbp::ringDisturb(const vec3 &v, const double ap) {
-    double xr = sqrt(v[0] * v[0] + v[1] * v[1]), z2 = v[2]*v[2];
+    double xr = sqrt(v[0] * v[0] + v[1] * v[1]), z2 = v[2] * v[2];
     double p2 = pow(xr + ap, 2) + z2, q2 = pow(xr - ap, 2) + z2;
     double p = sqrt(p2);
     double k = 1 - q2 / p2;
     if (k >= 1) {
         return numeric_limits<double>::infinity();
     }
-    return 4 / p * comp_ellint_1(k);
+    return 4 / p * comp_ellint_1(sqrt(k));
 }
 
-double crtbp::disturbFunc(const vec3 &v, const vec3 &r1) {
+double crtbp::dotDisturb(const vec3 &v, const vec3 &r1) {
     vec3 delta = {{v[0] - r1[0], v[1] - r1[1], v[2] - r1[2]}};
     double r1_norm = vecNorm(r1);
     double delta_norm = vecNorm(delta);

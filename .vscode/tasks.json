@@ -5,8 +5,7 @@
             "type": "shell",
             "command": "g++-7",
             "args": [
-                "-g",
-                "-fopenmp -std=c++17 -Wall -Wno-unused-variable -Wno-unused-function src/crtbp.cpp src/main.cpp -o main"
+                "-g -fopenmp -std=c++17 -Wall -Wno-unused-variable -Wno-unused-function src/crtbp.cpp src/main.cpp -o main"
             ],
             "group": {
                 "kind": "build",

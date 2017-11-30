@@ -75,5 +75,6 @@
         "ratio": "cpp",
         "system_error": "cpp",
         "thread": "cpp"
-    }
+    },
+    "python.pythonPath": "/Users/huangyukun/anaconda2/bin/python"
 }

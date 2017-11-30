@@ -232,7 +232,8 @@ class crtbp {
     static vec6 elementsToRot(const vec6 &x, const double t);
     static double mean2true(double M, double e);
     static double true2mean(double theta, double e);
-    static void singleAverage(const double N);
+    static void singleAverage(const double N, const double Sz,
+                              const double S_max, const size_t n);
     static void doubleAverage(const double H, const double a);
 
   private:
@@ -254,17 +255,21 @@ class crtbp {
     static double keplerIteration(double E, double e, double M);
     static vec6 uxxMatrix(const vec3 &x);
 
-    static double disturbFunc(const vec3 &v, const vec3 &r1);
+    static double dotDisturb(const vec3 &v, const vec3 &r1);
     static double ringDisturb(const vec3 &v, const double ap);
+    static double inteOneCircle(const vec5 &v, const size_t num);
     static double genH0(const double N, const double S, const double Sz);
     static double calSingleAve(const double N, const double S,
                                const double sigma);
+    static double calSingleAve(const double N, const double S, const double Sz,
+                               const double sig);
     static double calDoubleAve(const double H, const double a, const double e,
                                const double g);
     static bool isCross(const vec6 &vec_ref, const vec6 &vec,
                         const vec6 &vec_last);
     static bool isPeri(const double vr, const double vr_last);
     static double radialVel(const vec6 &v);
+    static vec3 getAEI(const double N, const double S, const double Sz);
 };
 
 static std::vector<vec6> readInputFromTxt(const std::string &inputstring) {

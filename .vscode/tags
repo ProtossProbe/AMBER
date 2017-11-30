@@ -6,10 +6,9 @@
 !_TAG_PROGRAM_VERSION	5.8	//
 Axes3D	../src/old/crtbp.py	/^from mpl_toolkits.mplot3d import Axes3D$/;"	kind:namespace	line:10
 C	../src/_generate.py	/^C = np.linspace(-1.0, 1.0, nx)$/;"	kind:variable	line:14
-CS	../src/_analytical.py	/^CS = ax.contour(X, Y, Z, level2, cmap="viridis_r")$/;"	kind:variable	line:47
 E	../src/_generate.py	/^E = np.linspace(0.02, 0.98, ny)$/;"	kind:variable	line:15
-G_action	../src/_plot.py	/^def G_action(a, e):$/;"	kind:function	line:24
-H_action	../src/_plot.py	/^def H_action(a, e, i):$/;"	kind:function	line:28
+G_action	../src/_plot.py	/^def G_action(a, e):$/;"	kind:function	line:28
+H_action	../src/_plot.py	/^def H_action(a, e, i):$/;"	kind:function	line:32
 L1_e	../src/old/crtbp.py	/^L1_e = 0.989990937177$/;"	kind:variable	line:19
 L1_m	../src/old/crtbp.py	/^L1_m = 0.836914718893$/;"	kind:variable	line:16
 L2_e	../src/old/crtbp.py	/^L2_e = 1.010070187506$/;"	kind:variable	line:20
@@ -19,21 +18,20 @@ L3_m	../src/old/crtbp.py	/^L3_m = -1.00506268026$/;"	kind:variable	line:18
 LEO	../src/old/crtbp.py	/^LEO = 167$/;"	kind:variable	line:24
 LLO	../src/old/crtbp.py	/^LLO = 150$/;"	kind:variable	line:25
 LOCATION	../src/_analytical.py	/^LOCATION = "assets\/_output\/"$/;"	kind:variable	line:11
-LOCATION	../src/_plot.py	/^LOCATION = "assets\/_output\/"$/;"	kind:variable	line:48
-LOCATION	../src/_tempplot.py	/^LOCATION = "assets\/_output\/"$/;"	kind:variable	line:11
-L_action	../src/_plot.py	/^def L_action(a):$/;"	kind:function	line:20
+LOCATION	../src/_plot.py	/^LOCATION = "assets\/_output\/"$/;"	kind:variable	line:52
+L_action	../src/_plot.py	/^def L_action(a):$/;"	kind:function	line:24
 N	../src/_analytical.py	/^N = -1.98$/;"	kind:variable	line:14
-N	../src/_plot.py	/^def N(a, e, i):$/;"	kind:function	line:36
+N	../src/_plot.py	/^def N(a, e, i):$/;"	kind:function	line:40
 PolarAxes	../src/_plot.py	/^from matplotlib.projections import PolarAxes$/;"	kind:namespace	line:5
 PolarAxes	../src/_tempplot.py	/^from matplotlib.projections import PolarAxes$/;"	kind:namespace	line:5
-Q	../src/_plot.py	/^def Q(a, e, i):$/;"	kind:function	line:40
+Q	../src/_plot.py	/^def Q(a, e, i):$/;"	kind:function	line:44
 R_matrix	../src/old/crtbp.py	/^def R_matrix(t, theta0=0.):$/;"	kind:function	line:901
 Radius_e	../src/old/crtbp.py	/^Radius_e = 6371$/;"	kind:variable	line:22
 Radius_m	../src/old/crtbp.py	/^Radius_m = 1737.4$/;"	kind:variable	line:23
-S	../src/_plot.py	/^def S(a, e, i):$/;"	kind:function	line:32
-Z	../src/_analytical.py	/^Z = Z.reshape(m, n)$/;"	kind:variable	line:34
-Z	../src/_analytical.py	/^Z = data$/;"	kind:variable	line:33
-Z	../src/_analytical.py	/^Z = np.nan_to_num(Z)$/;"	kind:variable	line:35
+S	../src/_plot.py	/^def S(a, e, i):$/;"	kind:function	line:36
+Z	../src/_analytical.py	/^Z = Z.reshape(m, n)$/;"	kind:variable	line:36
+Z	../src/_analytical.py	/^Z = data$/;"	kind:variable	line:34
+Z	../src/_analytical.py	/^Z = np.nan_to_num(Z)$/;"	kind:variable	line:37
 _analytical.py	../src/_analytical.py	1;"	kind:file	line:1
 _contour.py	../src/_contour.py	1;"	kind:file	line:1
 _generate.py	../src/_generate.py	1;"	kind:file	line:1
@@ -48,6 +46,7 @@ bcmfunc_em	../src/old/crtbp.py	/^def bcmfunc_em(y, t, theta_S0=0.):$/;"	kind:fun
 bcmfunc_se	../src/old/crtbp.py	/^def bcmfunc_se(y, t, theta_M0=0.):$/;"	kind:function	line:1008
 bcmfunc_se_tran	../src/old/crtbp.py	/^def bcmfunc_se_tran(t, y, theta_M0=0.):$/;"	kind:function	line:1039
 c	../src/old/crtbp.py	/^c = np.dot(a,b)$/;"	kind:variable	line:1180
+calI	../src/_tempplot.py	/^def calI(H, a, e):$/;"	kind:function	line:12
 cal_acc	../src/old/crtbp.py	/^def cal_acc(y,model='crtbp',mu=mu_m):$/;"	kind:function	line:378
 cal_eigenvector	../src/old/crtbp.py	/^def cal_eigenvector(mono):$/;"	kind:function	line:549
 cfunc	../src/_contour.py	/^def cfunc(e, i):$/;"	kind:function	line:22
@@ -63,7 +62,6 @@ data	../src/_analytical.py	/^data = np.loadtxt(target)$/;"	kind:variable	line:25
 data	../src/_contour.py	/^data = np.loadtxt(target[0])$/;"	kind:variable	line:27
 data	../src/_generate.py	/^        data = np.vstack((data, np.array([[a, e, i, 0, 0, 0, c]])))$/;"	kind:variable	line:28
 data	../src/_generate.py	/^data = np.empty((0, 7))$/;"	kind:variable	line:25
-data	../src/_tempplot.py	/^data = np.loadtxt(target)$/;"	kind:variable	line:13
 data_dir	../src/old/crtbp.py	/^data_dir = 'data\/'$/;"	kind:variable	line:36
 diff_correct	../src/old/crtbp.py	/^def diff_correct(y0, y, phi, option="fix_x", mu=mu_m):$/;"	kind:function	line:392
 dist2target	../src/old/crtbp.py	/^def dist2target(y, target='earth',model='se'):$/;"	kind:function	line:1117
@@ -87,8 +85,7 @@ interp1d	../src/old/crtbp.py	/^from scipy.interpolate import interp1d$/;"	kind:n
 jacobi_error	../src/old/crtbp.py	/^def jacobi_error(y, mu=mu_m, plot=False):$/;"	kind:function	line:208
 jacobi_inte	../src/old/crtbp.py	/^def jacobi_inte(y, mu=mu_m,option="normal"):$/;"	kind:function	line:71
 jacobi_xdot	../src/old/crtbp.py	/^def jacobi_xdot(y, jacobi, option='positive', mu=mu_m):$/;"	kind:function	line:853
-level	../src/_analytical.py	/^level = np.linspace(np.min(Z), np.min(Z) + 0.00013, 15)$/;"	kind:variable	line:37
-level2	../src/_analytical.py	/^level2 = [0.00093911]$/;"	kind:variable	line:38
+level	../src/_analytical.py	/^level = np.linspace(np.min(Z), np.min(Z) + 0.00015, 20)$/;"	kind:variable	line:39
 m	../src/_analytical.py	/^m = data.shape[0] \/ n$/;"	kind:variable	line:28
 mani_jacobi	../src/old/crtbp.py	/^def mani_jacobi(manifolds, mu=mu_m):$/;"	kind:function	line:83
 manifolds_gene	../src/old/crtbp.py	/^                    mu=mu_m, target='moon', crosstime=1, angle=np.pi\/2):$/;"	kind:function	line:612
@@ -137,25 +134,27 @@ poincare_section	../src/old/crtbp.py	/^def poincare_section(manifolds, x_cut=0, 
 primary_trans	../src/old/crtbp.py	/^def primary_trans(y_temp, t_temp, option='m2e'):$/;"	kind:function	line:933
 progressbar	../src/old/crtbp.py	/^import progressbar$/;"	kind:namespace	line:6
 readData	../src/_tempplot.py	/^def readData(data):$/;"	kind:function	line:8
-readElements	../src/_plot.py	/^def readElements(data):$/;"	kind:function	line:44
+readElements	../src/_plot.py	/^def readElements(data):$/;"	kind:function	line:48
 save_orbit_data	../src/old/crtbp.py	/^def save_orbit_data(filename, y0):$/;"	kind:function	line:291
 se2em	../src/old/crtbp.py	/^def se2em(y_temp, t_temp, theta0=0.):$/;"	kind:function	line:964
 section_delete	../src/old/crtbp.py	/^def section_delete(y_section, option='moon'):$/;"	kind:function	line:867
 t_factor_e	../src/old/crtbp.py	/^t_factor_e = 3.15581184e7\/(2*np.pi)$/;"	kind:variable	line:31
 t_factor_m	../src/old/crtbp.py	/^t_factor_m = 2.36059488e6\/(2*np.pi)$/;"	kind:variable	line:30
-target	../src/_analytical.py	/^target = LOCATION + "DoubleAve_-0.870000.txt"$/;"	kind:variable	line:17
+target	../src/_analytical.py	/^target = LOCATION + "DoubleAve_-0.950000.txt"$/;"	kind:variable	line:17
 target	../src/_contour.py	/^target = ["assets\/1026\/summary.out"]$/;"	kind:variable	line:26
-target	../src/_tempplot.py	/^target = LOCATION + "print.txt"$/;"	kind:variable	line:12
+tempCodeRunnerFile.py	../src/tempCodeRunnerFile.py	1;"	kind:file	line:1
 two_body_energy	../src/old/crtbp.py	/^def two_body_energy(y, mu=mu_m):$/;"	kind:function	line:1168
 unit_trans	../src/old/crtbp.py	/^def unit_trans(l, v, t, target='moon', option='dimension'):$/;"	kind:function	line:879
 v_LEO	../src/old/crtbp.py	/^v_LEO = 7.805$/;"	kind:variable	line:26
 v_LLO	../src/old/crtbp.py	/^v_LLO = 1.612$/;"	kind:variable	line:27
 v_factor_e	../src/old/crtbp.py	/^v_factor_e = 29.784$/;"	kind:variable	line:29
 v_factor_m	../src/old/crtbp.py	/^v_factor_m = 1.023$/;"	kind:variable	line:28
-wrapToPi	../src/_plot.py	/^def wrapToPi(phi):$/;"	kind:function	line:12
-x	../src/_analytical.py	/^x = np.linspace(0, 360, n)$/;"	kind:variable	line:29
+wrapTo180	../src/_plot.py	/^def wrapTo180(phi):$/;"	kind:function	line:12
+wrapTo360	../src/_plot.py	/^def wrapTo360(phi):$/;"	kind:function	line:20
+x	../src/_analytical.py	/^x = np.linspace(-180, 180, n) \/ 180.0 * np.pi$/;"	kind:variable	line:31
+x	../src/_analytical.py	/^x = np.linspace(-180, 180, n)$/;"	kind:variable	line:30
 xi	../src/_contour.py	/^xi = np.linspace(0, 1, 2000)$/;"	kind:variable	line:34
 xy2r	../src/old/crtbp.py	/^def xy2r(y, target='earth',model='se'):$/;"	kind:function	line:1129
-y	../src/_analytical.py	/^y = np.linspace(0, 0.489, m)$/;"	kind:variable	line:30
+y	../src/_analytical.py	/^y = np.linspace(0, 0.06, m)$/;"	kind:variable	line:32
 yi	../src/_contour.py	/^yi = np.linspace(90, 180, 7)$/;"	kind:variable	line:35
 zhfont	../src/old/crtbp.py	/^zhfont = matplotlib.font_manager.FontProperties($/;"	kind:variable	line:34
