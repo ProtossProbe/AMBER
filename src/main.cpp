@@ -44,21 +44,23 @@ int main(int argc, char *argv[]) {
         break;
     }
 
-    case '2':
+    case '2': {
         cout << "Execute Programm 2: Generate Single Averaged Hamiltonian"
              << endl;
-        double N, Sz, S_max;
+        double N, Sz, S_max, S_min;
         size_t n;
         switchfile >> N;
         switchfile >> Sz;
+        switchfile >> S_min;
         switchfile >> S_max;
         switchfile >> n;
         cout << "N constant is: " << N << endl << endl;
         cout << "Sz is: " << Sz << endl << endl;
-        system.singleAverage(N, Sz, S_max, n);
+        system.singleAverage(N, Sz, S_min, S_max, n);
         break;
-    case '3':
-        cout << "Execute Programm 2: Generate Double Averaged Hamiltonian"
+    }
+    case '3': {
+        cout << "Execute Programm 3: Generate Double Averaged Hamiltonian"
              << endl;
         double H_val, a;
         switchfile >> H_val;
@@ -69,6 +71,34 @@ int main(int argc, char *argv[]) {
         system.doubleAverage(H_val, a);
         break;
     }
-
+    case '4': {
+        cout << "Execute Programm 4: Find Planar Resonance Point" << endl;
+        ofstream output;
+        double Ns, S = 0.0058;
+        output.open(GLOBAL_OUTPUT_LOCATION + "EqPoints.txt");
+        for (Ns = -2.08; Ns <= -1.3; Ns += 0.001) {
+            S = system.findEqPoint(Ns, 0, S);
+            cout << setprecision(6) << "N constant is: " << Ns << endl << endl;
+            cout << setprecision(9) << "S is: " << S << endl << endl;
+            output << setprecision(12) << Ns << '\t' << S << endl;
+        }
+        output.close();
+        break;
+    }
+    case '5': {
+        cout << "Execute Programm 2: Generate Single Averaged omega Hamiltonian"
+             << endl;
+        double N, aa, Sz_max;
+        size_t nn;
+        switchfile >> N;
+        switchfile >> aa;
+        switchfile >> Sz_max;
+        switchfile >> nn;
+        cout << "N constant is: " << N << endl << endl;
+        cout << "a is: " << aa << endl << endl;
+        system.singleAverageOme(N, aa, Sz_max, nn);
+        break;
+    }
+    }
     switchfile.close();
 }

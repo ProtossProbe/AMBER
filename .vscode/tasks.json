@@ -14,11 +14,10 @@
         },
         {
             "label": "run",
+            "type": "shell",
             "command": "./main",
             "args": [
-                "assets/input.in",
-                "assets/info.in",
-                "assets/switch.in"
+                "assets/input.in assets/info.in assets/switch.in"
             ],
             "group": {
                 "kind": "test",

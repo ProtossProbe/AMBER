@@ -9,50 +9,17 @@ mu = 0.001
 mu_s = 1 - mu
 
 
-def wrapTo180(phi):
-    phi = phi % 360
-    for i in np.arange(phi.size):
-        if phi[i] > 180:
-            phi[i] -= 360
-    return phi
-
-
-def wrapTo360(phi):
-    return phi % 360
-
-
-def L_action(a):
-    return np.sqrt(a)
-
-
-def G_action(a, e):
-    return L_action(a) * np.sqrt(1 - e * e)
-
-
-def H_action(a, e, i):
-    return G_action(a, e) * np.cos(i / 180 * np.pi)
-
-
-def S(a, e, i):
-    return L_action(a) - G_action(a, e)
-
-
-def N(a, e, i):
-    return -L_action(a) + H_action(a, e, i)
-
-
-def Q(a, e, i):
-    return G_action(a, e) + H_action(a, e, i)
-
-
 def readElements(data):
     return [data[:, 0], data[:, 1], data[:, 2], data[:, 3], data[:, 4],
             data[:, 5], data[:, 6], data[:, 8]]
 
-LOCATION = "assets/_output/"
+LOCATION = "assets/0102/"
 
+# fig, (ax, ax2, ax3) = plt.subplots(3, sharex=True)
 fig, ax = plt.subplots()
-fig2, ax2 = plt.subplots()
+# fig2, ax2 = plt.subplots()
+# fig, ax = plt.subplots(subplot_kw=dict(projection='polar'))
+# fig3, ax3 = plt.subplots()
 # a = np.linspace(0.95, 1.05, 100)
 # e = np.linspace(0, 0.2, 100)
 
@@ -64,36 +31,62 @@ fig2, ax2 = plt.subplots()
 # cbar = plt.colorbar(CS)
 
 # print S(1, 0.01)
+# LOCATION = "assets/1227/"
+name = ["Ast_-1.20.txt", "Ast_-1.97.txt", "Ast_-2.00.txt"]
+# plt.axes().set_aspect('equal', 'datalim')
 for index in range(1, 2):
-    target = LOCATION + "Ast_" + str(index) + ".txt"
-
+    target = LOCATION + name[index - 1]
+    # target = LOCATION + "Ast_19_N=-1.96.txt"
     data = np.loadtxt(target)
     [t, a, e, i, ome, Ome, M, Megno] = readElements(data)
-    H = H_action(a, e, i)
+    H_val = H_action(a, e, i)
+    N_val = N(a, e, i)
+    Sz_val = Sz(a, e, i)
     ome_b = ome - Ome
     lam = ome_b + M
     lam_p = t * 360
 
-    sig1 = wrapTo180((lam - lam_p - 2 * ome_b))
-    sig2 = wrapTo180((lam - lam_p + 2 * Ome))
+    sig1 = wrapTo360((lam - lam_p - 2 * ome_b))
+    sig2 = wrapTo360((lam - lam_p + 2 * Ome))
     # sig_fast = wrapToPi(lam - lam_p)
-    ax.scatter(ome, e, s=0.5, alpha=0.5)
-    ax2.scatter(t, sig1, s=0.5, alpha=0.5)
-    ax2.scatter(t, sig2, s=0.5, alpha=0.5)
+    # ax.scatter(ome / 180 * np.pi, Sz_val, s=0.5, alpha=0.5)
+    # ax.scatter(t, ome, s=0.5, alpha=0.5)
+    # ax.scatter(t, ome, s=0.5, alpha=0.5)
+    # ax.scatter(t, e, s=0.5, alpha=0.5)
+    width = 1.0
+    ax.plot(t, a, linewidth=width)
+    ax2.plot(t, e, linewidth=width)
+    ax3.plot(t, sig1, linewidth=width)
+    # ax4.plot(t, ome, linewidth=width)
+    ax.plot((0, 150), (1, 1), linewidth=1.5, color="red", linestyle='dashed')
+    ax3.plot((0, 150), (180, 180), linewidth=1.5,
+             color="red", linestyle='dashed')
+    # ax2.scatter(t, ome, s=0.5, alpha=0.5)
+    # ax2.scatter(t, sig2, s=0.5, alpha=0.5)
+    # ax2.scatter(t, Sz_val, s=0.5, alpha=0.5)
     # ax.scatter(t, ome, s=0.5, alpha=0.5)
     # ax.scatter(t, i, s=0.5, alpha=0.5)
     # ax.scatter(t, sig / 180 * np.pi, s=0.5, alpha=0.5)
-    ax.grid(linestyle='dashed')
+    # ax.grid(linestyle='dashed')
     # ax.set_xlim(0, 360)
-    # ax.set_ylim(0, 0.368)
-    # ax.scatter(np.cos(sig / 180 * np.pi) * e,
-    #            np.sin(sig / 180 * np.pi) * e, s=0.5)
+    # ax.set_ylim(0, 0.00001)
+    # ax.scatter(np.cos(sig1 / 180.0 * np.pi) * e,
+    #            np.sin(sig1 / 180.0 * np.pi) * e, s=0.5)
+    # ax.scatter(sig1 / 180.0 * np.pi, e, s=1, alpha=0.05)
 
-    print np.mean(a), np.mean(H), np.mean(sig1), sig1[0]
-# ax.set_xlim(-180, 180)
-# ax.set_ylim(0, 0.04)
+    print np.mean(a), np.mean(N_val), np.mean(Sz_val), ome[0], sig1[0], sig2[0]
+xlim = 20
+ax.set_xlim(0, xlim)
+ax2.set_xlim(0, xlim)
+ax3.set_xlim(0, xlim)
+ax3.set_ylim(135, 225)
+
+# ax.set_ylim(0.971, 0.986)
 # plt.plot(t, lam_p)
-
+# fig.patch.set_visible(False)
+# ax.axis('off')
+fig.set_size_inches(6, 6)
+fig.savefig('numerical.pdf', dpi=500, transparent=True)
 # plt.plot(data1[:, 0], data1[:, 1])
 
 
