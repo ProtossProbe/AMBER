@@ -13,19 +13,16 @@ using namespace boost::math;
 using namespace boost::numeric::odeint;
 using namespace ProbeUtility;
 
-void crtbp::crtbp_ode::operator()(const vec6 &x, vec6 &dxdt, double t)
-{
+void crtbp::crtbp_ode::operator()(const vec6 &x, vec6 &dxdt, double t) {
     crtbp::eqOfMotion(x, dxdt);
 }
 
-void crtbp::crtbp_two_body::operator()(const vec6 &x, vec6 &dxdt, double t)
-{
+void crtbp::crtbp_two_body::operator()(const vec6 &x, vec6 &dxdt, double t) {
     crtbp::eqOfTwoBody(x, dxdt);
 }
 
 void crtbp::crtbp_ode_variation::operator()(const vec12 &x, vec12 &dxdt,
-                                            double t)
-{
+                                            double t) {
     vec6 x1 = {{x[0], x[1], x[2], x[3], x[4], x[5]}};
     vec6 x2 = {{x[6], x[7], x[8], x[9], x[10], x[11]}};
     vec6 dxdt1, dxdt2;
@@ -36,8 +33,7 @@ void crtbp::crtbp_ode_variation::operator()(const vec12 &x, vec12 &dxdt,
     joinVec(dxdt, dxdt1, dxdt2);
 };
 
-void crtbp::eqOfMotion(const vec6 &x, vec6 &dxdt)
-{
+void crtbp::eqOfMotion(const vec6 &x, vec6 &dxdt) {
     double x1 = x[0], x2 = x[1], x3 = x[2], x4 = x[3], x5 = x[4], x6 = x[5];
     double r1, r2;
     double xmu = x1 + mu, xmu1 = xmu - 1;
@@ -55,8 +51,7 @@ void crtbp::eqOfMotion(const vec6 &x, vec6 &dxdt)
     dxdt[5] = -muu * x3 * r1 - mu * x3 * r2;
 }
 
-void crtbp::eqOfTwoBody(const vec6 &x, vec6 &dxdt)
-{
+void crtbp::eqOfTwoBody(const vec6 &x, vec6 &dxdt) {
     double x1 = x[0], x2 = x[1], x3 = x[2], x4 = x[3], x5 = x[4], x6 = x[5];
     double r1;
     double x22 = x2 * x2, x33 = x3 * x3;
@@ -71,8 +66,7 @@ void crtbp::eqOfTwoBody(const vec6 &x, vec6 &dxdt)
     dxdt[5] = -x3 * r1;
 }
 
-void crtbp::eqOfVariation(const vec6 &x, vec6 &dxdt, const vec6 &p)
-{
+void crtbp::eqOfVariation(const vec6 &x, vec6 &dxdt, const vec6 &p) {
     double x1 = x[0], x2 = x[1], x3 = x[2], x4 = x[3], x5 = x[4], x6 = x[5];
     vec6 ux = crtbp::uxxMatrix({{p[0], p[1], p[2]}});
     double uxx = ux[0], uxy = ux[1], uxz = ux[2], uyy = ux[3], uyz = ux[4],
@@ -85,8 +79,7 @@ void crtbp::eqOfVariation(const vec6 &x, vec6 &dxdt, const vec6 &p)
     dxdt[5] = x1 * uxz + x2 * uyz + x3 * uzz;
 }
 
-double crtbp::jacobiConstant(const vec6 &x)
-{
+double crtbp::jacobiConstant(const vec6 &x) {
     double x1 = x[0], x2 = x[1], x3 = x[2], x4 = x[3], x5 = x[4], x6 = x[5];
     double xmu = x1 + mu, xmu1 = xmu - 1;
     double x22 = x2 * x2, x33 = x3 * x3;
@@ -97,8 +90,7 @@ double crtbp::jacobiConstant(const vec6 &x)
            2 * mu / r2;
 }
 
-void crtbp::inteSingleAdaptive(orbit3d &orbit, double endtime, size_t jump)
-{
+void crtbp::inteSingleAdaptive(orbit3d &orbit, double endtime, size_t jump) {
     crtbp_ode_variation eq;
     bulirsch_stoer<vec12> stepper(1e-12, 1e-12, orbit.dt, orbit.dt);
     // runge_kutta_dopri5<vec12> stepper_const;
@@ -106,13 +98,10 @@ void crtbp::inteSingleAdaptive(orbit3d &orbit, double endtime, size_t jump)
     // stepper_const);
     orbit.setOutputFile();
     cout << "Start: " << orbit.getName() << endl;
-    try
-    {
+    try {
         integrate_const(stepper, eq, orbit.vec, 0., endtime, orbit.dt,
                         observer(orbit, jump));
-    }
-    catch (double megno)
-    {
+    } catch (double megno) {
         cout << "Stop when MEGNO is larger than 8" << endl;
         orbit.megno_max = megno;
     }
@@ -122,25 +111,21 @@ void crtbp::inteSingleAdaptive(orbit3d &orbit, double endtime, size_t jump)
     cout << endl;
 }
 
-void crtbp::writeSummary(orbit3d &orbit)
-{
+void crtbp::writeSummary(orbit3d &orbit) {
     summary << orbit.getName() << " " << setprecision(5) << orbit.getJacobi()
             << " " << orbit.getElements()[1] << " " << orbit.getElements()[2]
             << " " << orbit.getMEGNOMax() << endl;
 }
 
-void crtbp::inteSingle(orbit3d &orbit, double endtime, size_t jump)
-{
+void crtbp::inteSingle(orbit3d &orbit, double endtime, size_t jump) {
     crtbp_ode_variation eq;
     runge_kutta_dopri5<vec12> stepper;
 
     orbit.setOutputFile();
     cout << "Start: " << orbit.getName() << endl;
     size_t steps = 0;
-    while (orbit.current_t <= endtime)
-    {
-        if (steps % jump == 0)
-        {
+    while (orbit.current_t <= endtime) {
+        if (steps % jump == 0) {
             writeElemData(orbit);
         }
         stepper.do_step(eq, orbit.vec, 0.0, orbit.dt);
@@ -152,20 +137,17 @@ void crtbp::inteSingle(orbit3d &orbit, double endtime, size_t jump)
     cout << endl;
 }
 
-void crtbp::inteNbody(orbit3d orbits[], size_t n, double endtime, size_t jump)
-{
+void crtbp::inteNbody(orbit3d orbits[], size_t n, double endtime, size_t jump) {
     summary.open(GLOBAL_OUTPUT_LOCATION + "summary.out");
 #pragma omp parallel for num_threads(6)
-    for (size_t i = 0; i < n; i++)
-    {
+    for (size_t i = 0; i < n; i++) {
         crtbp::inteSingleAdaptive(orbits[i], endtime, jump);
     }
 
     summary.close();
 }
 
-vec6 crtbp::uxxMatrix(const vec3 &x)
-{
+vec6 crtbp::uxxMatrix(const vec3 &x) {
     double x1 = x[0], x2 = x[1], x3 = x[2];
     double uxx, uxy, uxz, uyy, uyz, uzz;
 
@@ -199,8 +181,7 @@ vec6 crtbp::uxxMatrix(const vec3 &x)
     return {{uxx, uxy, uxz, uyy, uyz, uzz}};
 }
 
-vec6 crtbp::elementsToState(const vec6 &in)
-{
+vec6 crtbp::elementsToState(const vec6 &in) {
     // input: {{a,e,I,g,n,f}}
     // output: {{x,y,z,u,v,w}} (inerital)
     // a = semi-major axis (in AU)
@@ -232,8 +213,7 @@ vec6 crtbp::elementsToState(const vec6 &in)
     vec3Cross(QVector, HVector, PVector);
     double r = 0.0;
     r = p / (1.0 + e * cos(f));
-    for (int i = 0; i < 3; i++)
-    {
+    for (int i = 0; i < 3; i++) {
         out[i] = r * (cos(f) * PVector[i] + sin(f) * QVector[i]);
         out[3 + i] = sqrt(mu_sun / p) *
                      (-sin(f) * PVector[i] + (cos(f) + e) * QVector[i]);
@@ -241,8 +221,7 @@ vec6 crtbp::elementsToState(const vec6 &in)
     return out;
 }
 
-vec6 crtbp::stateToElements(const vec6 &in, const char option)
-{
+vec6 crtbp::stateToElements(const vec6 &in, const char option) {
     // input: {{x,y,z,u,v,w}} (inerital)
     // output: {{a,e,I,g,n,f}} or {{a,e,I,g,n,m}}
     // a = semi-major axis (in AU)
@@ -276,76 +255,58 @@ vec6 crtbp::stateToElements(const vec6 &in, const char option)
     vecDevide(unite, evector, e);
     I = acos(unith[2]);
     unitN = {{-unith[1], unith[0], 0}};
-    if (vecNorm(unitN) == 0)
-    {
+    if (vecNorm(unitN) == 0) {
         n = 0;
-        if (isCircle)
-        {
+        if (isCircle) {
             g = 0;
             f = atan2(unitR[1] * unith[2], unitR[0]);
-        }
-        else
-        {
+        } else {
             vec3Cross(temp, unite, unitR);
             g = atan2(unite[1] * unith[2], unite[0]);
             f = atan2(vecDot(unith, temp), vecDot(unite, unitR));
         }
-    }
-    else
-    {
+    } else {
         vec3Cross(temp, unitN, unitR);
         n = atan2(unith[0], -unith[1]);
         f = atan2(vecDot(unith, temp), vecDot(unitN, unitR));
-        if (isCircle)
-        {
+        if (isCircle) {
             g = 0;
-        }
-        else
-        {
+        } else {
             vec3Cross(temp, unitN, unite);
             g = atan2(vecDot(unith, temp), vecDot(unite, unitN));
             f = f - g;
         }
     }
-    if (g < 0)
-    {
+    if (g < 0) {
         g += 2 * pi;
     }
-    if (n < 0)
-    {
+    if (n < 0) {
         n += 2 * pi;
     }
     I *= pi_180;
     g *= pi_180;
     n *= pi_180;
 
-    if (option == 'f')
-    {
-        if (f < 0)
-        {
+    if (option == 'f') {
+        if (f < 0) {
             f += 2 * pi;
         }
         f *= pi_180;
         return {{a, e, I, g, n, f}};
     }
-    if (option == 'm')
-    {
+    if (option == 'm') {
         double m = crtbp::true2mean(f, e);
-        if (m < 0)
-        {
+        if (m < 0) {
             m += 2 * pi;
         }
         m *= pi_180;
         return {{a, e, I, g, n, m}};
-    }
-    else
-    {
+    } else {
         throw "option must be 'f' or 'm'!";
     }
 }
 
-vec6 crtbp::inertialToRot(const vec6 &x, const double t)
-{
+vec6 crtbp::inertialToRot(const vec6 &x, const double t) {
     double c = cos(t), s = sin(t);
     vec6 result;
     result[0] = c * x[0] + s * x[1];
@@ -358,8 +319,7 @@ vec6 crtbp::inertialToRot(const vec6 &x, const double t)
     return result;
 }
 
-vec6 crtbp::rotToInertial(const vec6 &x, const double t)
-{
+vec6 crtbp::rotToInertial(const vec6 &x, const double t) {
     double c = cos(t), s = sin(t);
     double x0 = x[0] + mu;
     vec6 result;
@@ -372,39 +332,30 @@ vec6 crtbp::rotToInertial(const vec6 &x, const double t)
     return result;
 }
 
-vec6 crtbp::elementsToRot(const vec6 &x, const double t)
-{
+vec6 crtbp::elementsToRot(const vec6 &x, const double t) {
     return crtbp::inertialToRot(crtbp::elementsToState(x), t);
 }
 
-double crtbp::true2mean(double theta, double e)
-{
-    if (theta == 0.0)
-    {
+double crtbp::true2mean(double theta, double e) {
+    if (theta == 0.0) {
         return 0.0;
     }
     double E = 2 * atan(sqrt((1 - e) / (1 + e)) * tan(theta / 2));
     return E - e * sin(E);
 }
 
-double crtbp::mean2true(const double M, const double e, const double acc)
-{
-    if (M == 0.0)
-    {
+double crtbp::mean2true(const double M, const double e, const double acc) {
+    if (M == 0.0) {
         return 0.0;
     }
     double result, E;
-    if (M < pi and M > 0)
-    {
+    if (M < pi and M > 0) {
         E = M + e / 2;
-    }
-    else
-    {
+    } else {
         E = M - e / 2;
     };
     double incr = 1;
-    while (fabs(incr) > acc)
-    {
+    while (fabs(incr) > acc) {
         incr = keplerIteration(E, e, M);
         E += incr;
     }
@@ -412,304 +363,26 @@ double crtbp::mean2true(const double M, const double e, const double acc)
     return result;
 }
 
-double crtbp::keplerIteration(double E, double e, double M)
-{
+double crtbp::keplerIteration(double E, double e, double M) {
     return -(E - e * sin(E) - M) / (1 - e * cos(E));
 }
 
-bool crtbp::isCross(const vec6 &vec_ref, const vec6 &vec,
-                    const vec6 &vec_last)
-{
-    double cross_last = vec_last[0] * vec_ref[1] - vec_last[1] * vec_ref[0];
-    double cross_now = vec_ref[0] * vec[1] - vec_ref[1] * vec[0];
-    return cross_last * cross_now > 0;
-}
-bool crtbp::isPeri(const double vr, const double vr_last)
-{
-    return (vr_last < 0) and (vr >= 0);
-}
-double crtbp::radialVel(const vec6 &v)
-{
-    vec3 pos = {{v[0], v[1], v[2]}};
-    vec3 vel = {{v[3], v[4], v[5]}};
-    return vecDot(pos, vel);
-}
-
-double crtbp::inteOneCircle(const vec5 &v, const size_t num)
-{
-    double a = v[0], e = v[1], I = v[2], omega = v[3], Omega = v[4];
-    double T = pi2, t, M, f;
-    double incr = pi2 / num, incrt = T / num, disturb = 0;
-    vec6 ele, vec;
-
-    for (size_t i = 0; i < num; i++)
-    {
-        t = incrt * i;
-        M = incr * i;
-        f = crtbp::mean2true(M, e, 1e-8) * pi_180;
-        ele = {{a, e, I, omega, Omega, f}};
-        vec = crtbp::elementsToRot(ele, t);
-        disturb +=
-            crtbp::dotDisturb({{vec[0], vec[1], vec[2]}}, {{1 - mu, 0, 0}});
-    }
-    return mu * disturb / num;
-}
-double crtbp::inteTwoCircle(const vec4 &v, const size_t num)
-{
-    vec6 ele, vec;
-    double a = v[0], e = v[1], I = v[2], sig = v[3];
-    double incr = pi2 / num, sig_z = 0, disturb = 0;
-    double Ome, ome;
-    for (size_t i = 0; i < num; i++)
-    {
-        sig_z = incr * i;
-        Ome = sig_z + sig;
-        ome = sig_z - sig;
-        disturb += inteOneCircle({{a, e, I, ome, Ome}}, num);
-    }
-    return disturb / num;
-}
-
-double crtbp::inteOneCircleOme(const vec5 &v, const size_t num)
-{
-    vec6 ele, vec;
-    double a = v[0], e = v[1], I = v[2], sig = v[3], ome = v[4], Ome = 0;
-    double incr = pi2 / num, disturb = 0;
-    double M, f, M_j;
-    for (size_t i = 0; i < num; i++)
-    {
-        M = incr * i;
-        f = crtbp::mean2true(M, e, 1e-8) * pi_180;
-        ele = {{a, e, I, ome, Ome, f}};
-        M_j = M - (ome - Ome + sig) * pi180;
-        vec = crtbp::elementsToRot(ele, M_j);
-        disturb +=
-            crtbp::dotDisturb({{vec[0], vec[1], vec[2]}}, {{1 - mu, 0, 0}});
-    }
-    return mu * disturb / num;
-}
-
-double crtbp::calSingleAveOme(const double a, const double e, const double I,
-                              const double sig, const double ome)
-{
-
-    // double a = N / (cos(I * pi180) * sqrt(1 - e * e) - 1);
-    return inteOneCircleOme({{a, e, I, sig, ome}}, 360);
-}
-
-void crtbp::singleAverageOme(const double N, const double a,
-                             const double Sz_max, const size_t n)
-{
-    ofstream output;
-    output.open(GLOBAL_OUTPUT_LOCATION + "SingleAveOme_" + to_string(N) + "_" +
-                to_string(Sz_max) + ".txt");
-    double Sz_min = 0, dSz = Sz_max / n;
-    double result;
-
-    for (double Sz = Sz_min; Sz <= Sz_max + 1e-10; Sz += dSz)
-    {
-        cout << "Sz: " << Sz << endl;
-        double S = 2 * sqrt(a) - (Sz - N);
-        vec3 AEI = getAEI(N, S, Sz);
-        double a2 = AEI[0], e = AEI[1], I = AEI[2];
-        cout << a2 << '\t' << e << '\t' << I << '\t' << endl;
-        for (double ome = -180; ome <= 180; ome += 1)
-        {
-            result = calSingleAveOme(a2, e, I, 180, ome) - genH0(N, S, Sz);
-            // result = calSingleAve(N, S, sig / 2) - genH0(N, S, Sz);
-            output << setprecision(12) << result << endl;
-        }
-    }
-    output.close();
-}
-
-double crtbp::calSingleAve(const double N, const double S, const double sigma)
-{
-    // 1/-1 resonance
-    double B = S + N;
-    double C = S - N;
-    double a = pow(C / 2, 2);
-    double e = sqrt(1 - pow(B / C, 2));
-
-    // 2/1 resonance
-    // double B = N - S;
-    // double C = N - 2 * S;
-    // double a = pow(B, 2);
-    // double e = sqrt(1 - pow(C / B, 2));
-    if (e < 0 or e >= 1)
-    {
-        return 0;
-    }
-
-    double omega = -2 * sigma;
-    return inteOneCircle({{a, e, 180, omega, 0}}, 360);
-}
-
-double crtbp::calSingleAve(const double a, const double e, const double I,
-                           const double sig)
-{
-
-    // double a = N / (cos(I * pi180) * sqrt(1 - e * e) - 1);
-
-    return inteTwoCircle({{a, e, I, sig}}, 180);
-}
-
-vec3 crtbp::getAEI(const double N, const double S, const double Sz)
-{
-    double a, e, I;
-    double L = (S + Sz - N) / 2;
-    e = (Sz - N - S) / (S + Sz - N);
-    I = Sz / (L * e) - 1;
-    e = sqrt(1 - e * e);
-    I = acos(I) * pi_180;
-    a = pow(L, 2);
-    return {{a, e, I}};
-}
-
-void crtbp::singleAverage(const double N, const double Sz, const double S_min,
-                          const double S_max, const size_t n)
-{
-    ofstream output;
-    output.open(GLOBAL_OUTPUT_LOCATION + "SingleAve_" + to_string(N) + "_" +
-                to_string(S_min) + "_" + to_string(S_max) + ".txt");
-    double dS = (S_max - S_min) / n;
-    double result;
-
-    for (double S = S_min; S <= S_max + 1e-10; S += dS)
-    {
-        cout << "S: " << S << endl;
-        vec3 AEI = getAEI(N, S, Sz);
-        double a = AEI[0], e = AEI[1], I = AEI[2];
-        cout << a << '\t' << e << '\t' << I << '\t' << endl;
-        for (double sig = -180; sig <= 180; sig += 0.5)
-        {
-            result = calSingleAve(N, S, sig / 2) - genH0(N, S, Sz);
-            output << setprecision(12) << result << endl;
-        }
-    }
-    output.close();
-}
-
-double crtbp::findEqPoint(const double N, const double sig, double S0)
-{
-    double left, right, middle, S_min = S0 - 0.001, S_max = S0 + 0.001, S_mid;
-    double dist = 1;
-    while (abs(dist) > 1e-13)
-    {
-        left = calSingleAve(N, S_min, sig);
-        right = calSingleAve(N, S_max, sig);
-        S_mid = (S_max + S_min) / 2;
-        if (left <= right)
-        {
-            S_max = S_mid;
-        }
-        else
-        {
-            S_min = S_mid;
-        }
-        dist = left - right;
-    }
-    return (S_max + S_min) / 2;
-}
-
-double crtbp::calDoubleAve(const double H, const double a, const double e,
-                           const double g)
-{
-    double I = acos(H / sqrt(a * (1 - e * e))) * pi_180;
-    size_t num = 180;
-    double incr = pi2 / num, M = 0, f = 0, disturb = 0;
-    vec6 ele, vec;
-    for (size_t i = 0; i < num; i++)
-    {
-        f = crtbp::mean2true(M, e, 1e-8) * pi_180;
-        ele = {{a, e, I, g, 0, f}};
-        vec = crtbp::elementsToState(ele);
-        disturb += crtbp::ringDisturb({{vec[0], vec[1], vec[2]}}, 1);
-        M += incr;
-    }
-    return mu * disturb / num / pi2;
-}
-
-void crtbp::doubleAverage(const double H, const double a)
-{
-    ofstream output;
-    output.open(GLOBAL_OUTPUT_LOCATION + "DoubleAve_" + to_string(H) + ".txt");
-    int e_m = sqrt(1 - H * H / a) * 100;
-    double e_min = 0, e_max = e_m / 100.0, de = 0.002;
-    cout << "emax: " << e_max << endl;
-    double result;
-    for (double e = e_min; e <= e_max; e += de)
-    {
-        cout << "e: " << e << endl;
-        for (double g = 0; g <= 360; g += 1)
-        {
-            result = calDoubleAve(H, a, e, g);
-            output << setprecision(12) << result << endl;
-        }
-    }
-    output.close();
-}
-
-double crtbp::ringDisturb(const vec3 &v, const double ap)
-{
-    double xr = sqrt(v[0] * v[0] + v[1] * v[1]), z2 = v[2] * v[2];
-    double p2 = pow(xr + ap, 2) + z2, q2 = pow(xr - ap, 2) + z2;
-    double p = sqrt(p2);
-    double k = 1 - q2 / p2;
-    if (k >= 1)
-    {
-        return numeric_limits<double>::infinity();
-    }
-    return 4 / p * comp_ellint_1(sqrt(k));
-}
-
-double crtbp::dotDisturb(const vec3 &v, const vec3 &r1)
-{
-    vec3 delta = {{v[0] - r1[0], v[1] - r1[1], v[2] - r1[2]}};
-    double r1_norm = vecNorm(r1);
-    double delta_norm = vecNorm(delta);
-    if (delta_norm == 0 or r1_norm == 0)
-    {
-        return numeric_limits<double>::infinity();
-    }
-    else
-    {
-        return 1 / delta_norm - vecDot(v, r1) / pow(r1_norm, 3);
-    }
-}
-
-double crtbp::genH0(const double N, const double S, const double Sz)
-{
-    // 1 / -1 resonance
-    double val = S - N + Sz;
-    return -2 / pow(val, 2) - val / 2;
-
-    // double val = N - S - Sz;
-    // return -1 / (2 * pow(val, 2)) - 2 * val;
-}
-
-void orbit3d::updateInerState()
-{
+void orbit3d::updateInerState() {
     vec_inertial =
         crtbp::rotToInertial(orbit3d::getState(), orbit3d::getTime());
 }
 
-void orbit3d::updateJacobi()
-{
+void orbit3d::updateJacobi() {
     jacobi = crtbp::jacobiConstant(orbit3d::getState());
     double error = jacobi - jacobi0;
-    if (error == 0)
-    {
+    if (error == 0) {
         jacobi_err = jacobi0;
-    }
-    else
-    {
+    } else {
         jacobi_err = error / jacobi0;
     }
 }
 
-vec2 orbit3d::deltaNormCal()
-{
+vec2 orbit3d::deltaNormCal() {
     vec2 delta;
     vec6 delta_vec = orbit3d::getDelta();
     delta[0] = vecNorm(delta_vec);
@@ -719,24 +392,20 @@ vec2 orbit3d::deltaNormCal()
     return delta;
 }
 
-double orbit3d::getLCN()
-{
+double orbit3d::getLCN() {
     if (current_t > 0)
         return log(vecNorm(orbit3d::getDelta()) / sqrt(6) / div) / current_t;
     else
         return 0.0;
 }
 
-void orbit3d::updateMEGNO()
-{
+void orbit3d::updateMEGNO() {
     vec2 delta = orbit3d::deltaNormCal();
-    if (current_t > 0)
-    {
+    if (current_t > 0) {
         double incr = delta[1] / delta[0] * dt * current_t;
         megno_temp += incr;
         megno_fast = megno_temp / current_t * 2;
-        if (current_t > ticktime)
-        {
+        if (current_t > ticktime) {
             new_steps++;
             megno_sum += megno_fast;
             megno = megno_sum / new_steps;
@@ -746,15 +415,13 @@ void orbit3d::updateMEGNO()
     }
 }
 
-void orbit3d::updateElements()
-{
+void orbit3d::updateElements() {
     ele = crtbp::stateToElements(vec_inertial, 'm');
 }
 
 // values need to be updated per step:
 // steps, time, megno, megno_max
-double orbit3d::updatePerStep(const double t)
-{
+double orbit3d::updatePerStep(const double t) {
     steps++;
     current_t = t;
     orbit3d::updateMEGNO();
@@ -763,8 +430,7 @@ double orbit3d::updatePerStep(const double t)
 
 // values need to be updated per output:
 // jacobi, jacobi_err, vec_inertial, ele
-void orbit3d::updatePerOutput()
-{
+void orbit3d::updatePerOutput() {
     orbit3d::updateJacobi();
     orbit3d::updateInerState();
     orbit3d::updateElements();
@@ -772,8 +438,7 @@ void orbit3d::updatePerOutput()
 
 // values need to be set in the first time:
 // ele, dt, name, vec, jacobi0
-void orbit3d::setInitial(vec6 elements, double dtt, double endt, string na)
-{
+void orbit3d::setInitial(vec6 elements, double dtt, double endt, string na) {
     ele = elements;
     dt = dtt;
     name = na;

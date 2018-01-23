@@ -101,31 +101,6 @@ int main(int argc, char *argv[]) {
         aver_system.averageOme(phiAmp);
         break;
     }
-    case '5': {
-        cout << "Execute Programm 5: Generate Double Averaged Hamiltonian"
-             << endl;
-        double H_val, a;
-        switchfile >> H_val;
-        switchfile >> a;
-        cout << "H constant is: " << H_val << endl;
-        cout << "a is: " << a << endl << endl;
-        ;
-        inte_system.doubleAverage(H_val, a);
-        break;
+        switchfile.close();
     }
-        // case '4': {
-        //     cout << "Execute Programm 4: Find Planar Resonance Point" <<
-        //     endl; ofstream output; double Ns, S = 0.0058;
-        //     output.open(GLOBAL_OUTPUT_LOCATION + "EqPoints.txt");
-        //     for (Ns = -2.08; Ns <= -1.3; Ns += 0.001) {
-        //         S = inte_system.findEqPoint(Ns, 0, S);
-        //         cout << setprecision(6) << "N constant is: " << Ns << endl <<
-        //         endl; cout << setprecision(9) << "S is: " << S << endl <<
-        //         endl; output << setprecision(12) << Ns << '\t' << S << endl;
-        //     }
-        //     output.close();
-        //     break;
-        // }
-    }
-    switchfile.close();
 }
