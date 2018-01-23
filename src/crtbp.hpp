@@ -54,8 +54,7 @@ typedef boost::array<double, 7> vec7;
 typedef boost::array<double, 12> vec12;
 
 // orbit3d class
-class orbit3d
-{
+class orbit3d {
   private:
     double div = 1e-8;
     double megno_temp = 0;
@@ -122,23 +121,19 @@ class orbit3d
     // declared and defined in this header file
     double getTime() { return current_t; }
     double getTimeYear() { return current_t / pi2; }
-    vec6 getState()
-    {
+    vec6 getState() {
         return {{vec[0], vec[1], vec[2], vec[3], vec[4], vec[5]}};
     }
-    vec6 getDelta()
-    {
+    vec6 getDelta() {
         return {{vec[6], vec[7], vec[8], vec[9], vec[10], vec[11]}};
     }
     vec3 getPos() { return {{vec[0], vec[1], vec[2]}}; }
     vec3 getVel() { return {{vec[3], vec[4], vec[5]}}; }
     vec6 getInerState() { return vec_inertial; }
-    vec3 getInerPos()
-    {
+    vec3 getInerPos() {
         return {{vec_inertial[0], vec_inertial[1], vec_inertial[2]}};
     }
-    vec3 getInerVel()
-    {
+    vec3 getInerVel() {
         return {{vec_inertial[3], vec_inertial[4], vec_inertial[5]}};
     }
     std::string getName() { return name; };
@@ -147,16 +142,14 @@ class orbit3d
     double getJacobiError() { return jacobi_err; };
     double getMEGNO() { return megno; };
     double getMEGNOMax() { return megno_max; };
-    void setState(const vec6 &state)
-    {
+    void setState(const vec6 &state) {
         for (size_t i = 0; i < state.size(); i++)
             vec[i] = state[i];
     };
     void setElement(vec6 element) { ele = element; };
     void setName(std::string newname) { name = newname; };
     void setDt(double t) { dt = t; };
-    void setOutputFile()
-    {
+    void setOutputFile() {
         std::string location = GLOBAL_OUTPUT_LOCATION + "Ast_" + getName();
         outputfile.open(location + ".txt");
     };
@@ -170,8 +163,7 @@ class orbit3d
     double getLCN();
 };
 
-static void printInteData(orbit3d &orb)
-{
+static void printInteData(orbit3d &orb) {
     std::cout << "State:  ";
     for (double j : orb.getPos())
         std::cout << std::setw(12) << j << " ";
@@ -183,8 +175,7 @@ static void printInteData(orbit3d &orb)
               << std::endl;
 }
 
-static void writeElemData(orbit3d &orb)
-{
+static void writeElemData(orbit3d &orb) {
     orb.outputfile << std::setw(8) << orb.getTimeYear() << '\t';
     for (double j : orb.getElements())
         orb.outputfile << std::setw(10) << j << '\t';
@@ -192,8 +183,7 @@ static void writeElemData(orbit3d &orb)
                    << std::setw(10) << orb.getMEGNO() << std::endl;
 }
 
-static void writePosData(orbit3d &orb)
-{
+static void writePosData(orbit3d &orb) {
     orb.outputfile << std::setw(8) << orb.getTimeYear() << '\t';
     for (double j : orb.getInerPos())
         orb.outputfile << std::setw(10) << j << '\t';
@@ -201,46 +191,37 @@ static void writePosData(orbit3d &orb)
                    << std::setw(10) << orb.getMEGNO() << std::endl;
 }
 
-struct observer
-{
+struct observer {
     orbit3d *orb;
     size_t jump;
     observer(orbit3d &orbit, size_t jump) : orb(&orbit), jump(jump) {}
-    void operator()(const vec12 &x, double t)
-    {
-        if (t > 0)
-        {
+    void operator()(const vec12 &x, double t) {
+        if (t > 0) {
             auto megno = (*orb).updatePerStep(t);
-            if (megno >= 8)
-            {
+            if (megno >= 8) {
                 throw 8.0;
                 return;
             }
         }
-        if ((*orb).steps % jump == 0)
-        {
+        if ((*orb).steps % jump == 0) {
             (*orb).updatePerOutput();
-            // writeElemData(*orb);
-            writePosData(*orb);
+            writeElemData(*orb);
+            // writePosData(*orb);
         }
     }
 };
 
-struct observer_default
-{
-    void operator()(const vec6 &x, double t)
-    {
+struct observer_default {
+    void operator()(const vec6 &x, double t) {
         std::cout << "Time: " << t << '\t';
-        for (auto var : x)
-        {
+        for (auto var : x) {
             std::cout << "State: " << var << '\t';
         }
         std::cout << std::endl;
     }
 };
 
-class crtbp
-{
+class crtbp {
   public:
     crtbp() = default;
     ~crtbp() = default;
@@ -270,20 +251,17 @@ class crtbp
     static double findEqPoint(const double N, const double sig, double S0);
 
   private:
-    class crtbp_ode
-    {
+    class crtbp_ode {
       public:
         void operator()(const vec6 &x, vec6 &dxdt, double t);
     };
 
-    class crtbp_ode_variation
-    {
+    class crtbp_ode_variation {
       public:
         void operator()(const vec12 &x, vec12 &dxdt, double t);
     };
 
-    class crtbp_two_body
-    {
+    class crtbp_two_body {
       public:
         void operator()(const vec6 &x, vec6 &dxdt, double t);
     };
@@ -313,19 +291,15 @@ class crtbp
     static vec3 getAEI(const double N, const double S, const double Sz);
 };
 
-static std::vector<vec6> readInputFromTxt(const std::string &inputstring)
-{
+static std::vector<vec6> readInputFromTxt(const std::string &inputstring) {
     std::ifstream inputfile;
     inputfile.open(inputstring);
     std::vector<vec6> inputmatrix;
     std::string name;
     vec6 inputarray;
-    if (inputfile.is_open())
-    {
-        while (!inputfile.eof())
-        {
-            for (size_t i = 0; i < 6; i++)
-            {
+    if (inputfile.is_open()) {
+        while (!inputfile.eof()) {
+            for (size_t i = 0; i < 6; i++) {
                 inputfile >> inputarray[i];
             }
             inputmatrix.push_back(inputarray);
@@ -334,17 +308,13 @@ static std::vector<vec6> readInputFromTxt(const std::string &inputstring)
     return inputmatrix;
 }
 
-static vec3 readInfoFromTxt(const std::string &infostring)
-{
+static vec3 readInfoFromTxt(const std::string &infostring) {
     std::ifstream infofile;
     infofile.open(infostring);
     vec3 infoarray;
-    if (infofile.is_open())
-    {
-        while (!infofile.eof())
-        {
-            for (size_t i = 0; i < infoarray.size(); i++)
-            {
+    if (infofile.is_open()) {
+        while (!infofile.eof()) {
+            for (size_t i = 0; i < infoarray.size(); i++) {
                 infofile >> infoarray[i];
             }
         }

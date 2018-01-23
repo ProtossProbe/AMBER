@@ -57,8 +57,8 @@ def S(a, e, i):
     return L_action(a) - G_action(a, e)
 
 
-def Ns(a, e, i):
-    return -L_action(a) + H_action(a, e, i)
+def N(a, e, i, kj, k):
+    return -(kj + k) * L_action(a) / k + S(a, e, i) + Sz(a, e, i)
 
 
 def Sz(a, e, i):

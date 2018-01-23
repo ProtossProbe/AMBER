@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+import _utility as ut
 
 
 mu = 0.001
@@ -16,10 +17,10 @@ index = 2
 # a = 1.05
 
 
-target = LOCATION + "SingleAve_-1.913000_0.040000_0.140000.txt"
-N = -1.913
-S_min = 0.04
-S_max = 0.14
+target = LOCATION + "SingleAveOme_-1.835000_0.050000.txt"
+N = -2.378
+S_min = 0.00
+S_max = 0.05
 n = 181
 # target = LOCATION + "Ast_" + str(index) + ".txt"
 # target2 = LOCATION + "A_" + str(index) + ".txt"
@@ -34,10 +35,10 @@ data = np.loadtxt(target)
 
 m = data.shape[0] / n
 print n, m
-x = np.linspace(-180, 180, n)
+# x = np.linspace(-180, 180, n)
 x = np.linspace(-180, 180, n) / 180.0 * np.pi
 y = np.linspace(S_min, S_max, m)
-# e = NStoAE(N, y)[1]
+# e = ut.NStoAE(N, y)[1]
 X, Y = np.meshgrid(x, y)
 Z = data
 Z = Z.reshape(m, n)
@@ -48,19 +49,20 @@ level = np.linspace(Zmin, Zmin + 0.00125, 6)
 level = np.insert(level, 1, Zmin + 0.000005)
 # level = np.hstack((level, Zmin + 0.00047))
 
-level2 = np.linspace(Zmin, Zmin + 0.008, 50)
+level2 = np.linspace(Zmin, Zmin + 0.000005, 30)
+# level2 = np.linspace(Zmax - 0.010, Zmax, 30)
 # level2 = np.hstack((level2, Zmin + 0.0037))
 
-# fig, ax = plt.subplots()
-fig, ax = plt.subplots(subplot_kw=dict(projection='polar'))
-ax.set_ylim(0.3, 0.5)
+fig1, ax1 = plt.subplots()
+fig2, ax2 = plt.subplots(subplot_kw=dict(projection='polar'))
+ax2.set_ylim(0, 0.05)
 # fig2, ax2 = plt.subplots()
-ax.contour(X, Y, Z, level, colors='black', linewidths=1, alpha=0.25)
+# ax.contour(X, Y, Z, level, colors='black', linewidths=1, alpha=0.25)
 cmap = plt.get_cmap('magma_r')
-new_cmap = truncate_colormap(cmap, 0, 0.8)
-ax.contourf(X, Y, Z, level2, cmap=new_cmap)
-ax.grid(color='black', linestyle='dotted', alpha=0.2, linewidth=1)
-ax.grid(True)
+ax1.contourf(X, Y, Z, level2, cmap=cmap)
+ax2.contourf(X, Y, Z, level2, cmap=cmap)
+ax2.grid(color='black', linestyle='dotted', alpha=0.2, linewidth=1)
+ax2.grid(True)
 # ax.yaxis.set_ticks(np.arange(0.05, 0.25, 0.05))
 # ax.xaxis.grid(True)
 

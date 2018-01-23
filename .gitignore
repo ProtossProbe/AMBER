@@ -39,5 +39,6 @@ bin
 #data files
 *.dat
 *.txt
+*.out
 
 *.pyc

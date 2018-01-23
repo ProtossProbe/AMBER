@@ -6,7 +6,7 @@
 //  Copyright © 2016-2017 probe. All rights reserved.
 //
 
-#include "crtbp.hpp"
+#include "resonance.hpp"
 
 using namespace std;
 using namespace boost::math;
@@ -18,8 +18,12 @@ int main(int argc, char *argv[]) {
     ifstream switchfile;
     switchfile.open(switchstring);
 
+    size_t k, kj;
+    double N, Sz, Max, Min, a;
+    int phi, phiAmp;
+    size_t numY, num;
     char swi;
-    crtbp system;
+    crtbp inte_system;
     switchfile >> swi;
     switch (swi) {
     case '1': {
@@ -39,28 +43,66 @@ int main(int argc, char *argv[]) {
             orbits[i].setInitial(input[i], dt, endt, to_string(i + 1));
         }
         double start = omp_get_wtime();
-        system.inteNbody(orbits, number, endt, jump);
+        inte_system.inteNbody(orbits, number, endt, jump);
         cout << "Time: " << omp_get_wtime() - start << endl;
         break;
     }
 
     case '2': {
         cout << "Execute Programm 2: Generate Single Averaged Hamiltonian"
+             << endl
              << endl;
-        double N, Sz, S_max, S_min;
-        size_t n;
+        switchfile >> kj;
+        switchfile >> k;
         switchfile >> N;
         switchfile >> Sz;
-        switchfile >> S_min;
-        switchfile >> S_max;
-        switchfile >> n;
-        cout << "N constant is: " << N << endl << endl;
+        switchfile >> Min;
+        switchfile >> Max;
+        switchfile >> numY;
+        switchfile >> num;
+        cout << "N constant is: " << N << endl;
         cout << "Sz is: " << Sz << endl << endl;
-        system.singleAverage(N, Sz, S_min, S_max, n);
+        resonance aver_system(k, kj, N, Sz, Min, Max, numY, num);
+        aver_system.averagePhi();
         break;
     }
     case '3': {
-        cout << "Execute Programm 3: Generate Double Averaged Hamiltonian"
+        cout << "Execute Programm 3: Generate Single Averaged omega Hamiltonian"
+             << endl;
+        switchfile >> kj;
+        switchfile >> k;
+        switchfile >> N;
+        switchfile >> a;
+        switchfile >> phi;
+        switchfile >> Max;
+        switchfile >> numY;
+        switchfile >> num;
+        cout << "N constant is: " << N << endl;
+        cout << "a is: " << a << endl << endl;
+        resonance aver_system(k, kj, N, a, phi, Max, numY, num);
+        aver_system.averageOme(0);
+        break;
+    }
+    case '4': {
+        cout << "Execute Programm 4: Generate Double Averaged omega Hamiltonian"
+             << endl;
+        switchfile >> kj;
+        switchfile >> k;
+        switchfile >> N;
+        switchfile >> a;
+        switchfile >> phi;
+        switchfile >> phiAmp;
+        switchfile >> Max;
+        switchfile >> numY;
+        switchfile >> num;
+        cout << "N constant is: " << N << endl;
+        cout << "a is: " << a << endl << endl;
+        resonance aver_system(k, kj, N, a, phi, Max, numY, num);
+        aver_system.averageOme(phiAmp);
+        break;
+    }
+    case '5': {
+        cout << "Execute Programm 5: Generate Double Averaged Hamiltonian"
              << endl;
         double H_val, a;
         switchfile >> H_val;
@@ -68,37 +110,22 @@ int main(int argc, char *argv[]) {
         cout << "H constant is: " << H_val << endl;
         cout << "a is: " << a << endl << endl;
         ;
-        system.doubleAverage(H_val, a);
+        inte_system.doubleAverage(H_val, a);
         break;
     }
-    case '4': {
-        cout << "Execute Programm 4: Find Planar Resonance Point" << endl;
-        ofstream output;
-        double Ns, S = 0.0058;
-        output.open(GLOBAL_OUTPUT_LOCATION + "EqPoints.txt");
-        for (Ns = -2.08; Ns <= -1.3; Ns += 0.001) {
-            S = system.findEqPoint(Ns, 0, S);
-            cout << setprecision(6) << "N constant is: " << Ns << endl << endl;
-            cout << setprecision(9) << "S is: " << S << endl << endl;
-            output << setprecision(12) << Ns << '\t' << S << endl;
-        }
-        output.close();
-        break;
-    }
-    case '5': {
-        cout << "Execute Programm 2: Generate Single Averaged omega Hamiltonian"
-             << endl;
-        double N, aa, Sz_max;
-        size_t nn;
-        switchfile >> N;
-        switchfile >> aa;
-        switchfile >> Sz_max;
-        switchfile >> nn;
-        cout << "N constant is: " << N << endl << endl;
-        cout << "a is: " << aa << endl << endl;
-        system.singleAverageOme(N, aa, Sz_max, nn);
-        break;
-    }
+        // case '4': {
+        //     cout << "Execute Programm 4: Find Planar Resonance Point" <<
+        //     endl; ofstream output; double Ns, S = 0.0058;
+        //     output.open(GLOBAL_OUTPUT_LOCATION + "EqPoints.txt");
+        //     for (Ns = -2.08; Ns <= -1.3; Ns += 0.001) {
+        //         S = inte_system.findEqPoint(Ns, 0, S);
+        //         cout << setprecision(6) << "N constant is: " << Ns << endl <<
+        //         endl; cout << setprecision(9) << "S is: " << S << endl <<
+        //         endl; output << setprecision(12) << Ns << '\t' << S << endl;
+        //     }
+        //     output.close();
+        //     break;
+        // }
     }
     switchfile.close();
 }
