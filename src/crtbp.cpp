@@ -14,11 +14,11 @@ using namespace boost::numeric::odeint;
 using namespace ProbeUtility;
 
 void crtbp::crtbp_ode::operator()(const vec6 &x, vec6 &dxdt, double t) {
-    crtbp::eqOfMotion(x, dxdt);
+    eqOfMotion(x, dxdt);
 }
 
 void crtbp::crtbp_two_body::operator()(const vec6 &x, vec6 &dxdt, double t) {
-    crtbp::eqOfTwoBody(x, dxdt);
+    eqOfTwoBody(x, dxdt);
 }
 
 void crtbp::crtbp_ode_variation::operator()(const vec12 &x, vec12 &dxdt,
@@ -27,8 +27,8 @@ void crtbp::crtbp_ode_variation::operator()(const vec12 &x, vec12 &dxdt,
     vec6 x2 = {{x[6], x[7], x[8], x[9], x[10], x[11]}};
     vec6 dxdt1, dxdt2;
 
-    crtbp::eqOfMotion(x1, dxdt1);
-    crtbp::eqOfVariation(x2, dxdt2, x1);
+    eqOfMotion(x1, dxdt1);
+    eqOfVariation(x2, dxdt2, x1);
 
     joinVec(dxdt, dxdt1, dxdt2);
 };
@@ -68,7 +68,7 @@ void crtbp::eqOfTwoBody(const vec6 &x, vec6 &dxdt) {
 
 void crtbp::eqOfVariation(const vec6 &x, vec6 &dxdt, const vec6 &p) {
     double x1 = x[0], x2 = x[1], x3 = x[2], x4 = x[3], x5 = x[4], x6 = x[5];
-    vec6 ux = crtbp::uxxMatrix({{p[0], p[1], p[2]}});
+    vec6 ux = uxxMatrix({{p[0], p[1], p[2]}});
     double uxx = ux[0], uxy = ux[1], uxz = ux[2], uyy = ux[3], uyz = ux[4],
            uzz = ux[5];
     dxdt[0] = x4;
@@ -141,7 +141,7 @@ void crtbp::inteNbody(orbit3d orbits[], size_t n, double endtime, size_t jump) {
     summary.open(GLOBAL_OUTPUT_LOCATION + "summary.out");
 #pragma omp parallel for num_threads(6)
     for (size_t i = 0; i < n; i++) {
-        crtbp::inteSingleAdaptive(orbits[i], endtime, jump);
+        inteSingleAdaptive(orbits[i], endtime, jump);
     }
 
     summary.close();
@@ -295,7 +295,7 @@ vec6 crtbp::stateToElements(const vec6 &in, const char option) {
         return {{a, e, I, g, n, f}};
     }
     if (option == 'm') {
-        double m = crtbp::true2mean(f, e);
+        double m = true2mean(f, e);
         if (m < 0) {
             m += 2 * pi;
         }
@@ -333,7 +333,7 @@ vec6 crtbp::rotToInertial(const vec6 &x, const double t) {
 }
 
 vec6 crtbp::elementsToRot(const vec6 &x, const double t) {
-    return crtbp::inertialToRot(crtbp::elementsToState(x), t);
+    return inertialToRot(elementsToState(x), t);
 }
 
 double crtbp::true2mean(double theta, double e) {
@@ -368,12 +368,11 @@ double crtbp::keplerIteration(double E, double e, double M) {
 }
 
 void orbit3d::updateInerState() {
-    vec_inertial =
-        crtbp::rotToInertial(orbit3d::getState(), orbit3d::getTime());
+    vec_inertial = crtbp::rotToInertial(getState(), getTime());
 }
 
 void orbit3d::updateJacobi() {
-    jacobi = crtbp::jacobiConstant(orbit3d::getState());
+    jacobi = crtbp::jacobiConstant(getState());
     double error = jacobi - jacobi0;
     if (error == 0) {
         jacobi_err = jacobi0;
@@ -387,20 +386,20 @@ vec2 orbit3d::deltaNormCal() {
     vec6 delta_vec = orbit3d::getDelta();
     delta[0] = vecNorm(delta_vec);
     vec6 deltadot_vec;
-    crtbp::eqOfVariation(delta_vec, deltadot_vec, orbit3d::getState());
+    crtbp::eqOfVariation(delta_vec, deltadot_vec, getState());
     delta[1] = vecDot(deltadot_vec, delta_vec) / delta[0];
     return delta;
 }
 
 double orbit3d::getLCN() {
     if (current_t > 0)
-        return log(vecNorm(orbit3d::getDelta()) / sqrt(6) / div) / current_t;
+        return log(vecNorm(getDelta()) / sqrt(6) / div) / current_t;
     else
         return 0.0;
 }
 
 void orbit3d::updateMEGNO() {
-    vec2 delta = orbit3d::deltaNormCal();
+    vec2 delta = deltaNormCal();
     if (current_t > 0) {
         double incr = delta[1] / delta[0] * dt * current_t;
         megno_temp += incr;
@@ -424,29 +423,29 @@ void orbit3d::updateElements() {
 double orbit3d::updatePerStep(const double t) {
     steps++;
     current_t = t;
-    orbit3d::updateMEGNO();
-    return orbit3d::getMEGNOMax();
+    updateMEGNO();
+    return getMEGNOMax();
 }
 
 // values need to be updated per output:
 // jacobi, jacobi_err, vec_inertial, ele
 void orbit3d::updatePerOutput() {
-    orbit3d::updateJacobi();
-    orbit3d::updateInerState();
-    orbit3d::updateElements();
+    updateJacobi();
+    updateInerState();
+    updateElements();
 }
 
 // values need to be set in the first time:
 // ele, dt, name, vec, jacobi0
-void orbit3d::setInitial(vec6 elements, double dtt, double endt, string na) {
+orbit3d &orbit3d::setInitial(vec6 elements, double dtt, double endt,
+                             string na) {
     ele = elements;
     dt = dtt;
     name = na;
-    auto ele_true = orbit3d::getElements();
+    auto ele_true = getElements();
     ele_true[5] =
         crtbp::mean2true(ele_true[5] * pi180, ele_true[1], 1e-12) * pi_180;
-    orbit3d::setState(crtbp::elementsToRot(ele_true, 0));
-    orbit3d::setTickTime(0.15 * endt);
-    jacobi0 = crtbp::jacobiConstant(orbit3d::getState());
-    ;
+    setState(crtbp::elementsToRot(ele_true, 0)).setTickTime(0.15 * endt);
+    jacobi0 = crtbp::jacobiConstant(getState());
+    return *this;
 }

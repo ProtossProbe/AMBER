@@ -76,5 +76,6 @@
         "system_error": "cpp",
         "thread": "cpp"
     },
-    "python.pythonPath": "/Users/huangyukun/anaconda2/bin/python"
+    "python.pythonPath": "/Users/huangyukun/anaconda2/bin/python",
+    "C_Cpp.errorSquiggles": "Disabled"
 }

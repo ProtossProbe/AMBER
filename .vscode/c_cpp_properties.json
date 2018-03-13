@@ -2,26 +2,26 @@
     "configurations": [{
         "name": "Mac",
         "includePath": [
+            "/usr/local/Cellar/gcc/7.2.0/include/c++/7.2.0",
+            "/usr/local/Cellar/gcc/7.2.0/include/c++/7.2.0/x86_64-apple-darwin17.0.0",
             "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
-            "/usr/local/include",
             "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.0.0/include",
             "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
+            "/usr/local/include",
             "/usr/include",
-            "/usr/local/Cellar/gcc/7.2.0/include/c++/7.2.0",
-            "/usr/local/Cellar/gcc/7.2.0/include/c++/7.2.0/x86_64-apple-darwin17.0.0/bits",
             "${workspaceRoot}"
         ],
         "defines": [],
         "intelliSenseMode": "clang-x64",
         "browse": {
             "path": [
+                "/usr/local/Cellar/gcc/7.2.0/include/c++/7.2.0",
+                "/usr/local/Cellar/gcc/7.2.0/include/c++/7.2.0/x86_64-apple-darwin17.0.0",
                 "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
-                "/usr/local/include",
                 "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/9.0.0/include",
                 "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
+                "/usr/local/include",
                 "/usr/include",
-                "/usr/local/Cellar/gcc/7.2.0/include/c++/7.2.0",
-                "/usr/local/Cellar/gcc/7.2.0/include/c++/7.2.0/x86_64-apple-darwin17.0.0/bits",
                 "${workspaceRoot}"
             ],
             "limitSymbolsToIncludedHeaders": true,

@@ -126,6 +126,6 @@ print calN(9.6769180 / saturn_a, 0.7623217, 180)
 # print calAEI(-1.94, 1.004, 0.0033)
 # for e in np.arange(0.17, 0.19, 0.001):
 
-# for delta in np.arange(0, 360, 10):
-#     print cala(-1.65, 0.75), 0.75, 180, 0 + delta, 0, -180 + delta
+for delta in np.arange(0, 360, 10):
+    print 1, 0.5, 90, 0, 0, delta
 # fig.savefig('N=-2.02.pdf', dpi=500, transparent=True)

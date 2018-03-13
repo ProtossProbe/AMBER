@@ -74,7 +74,7 @@ double resonance::dotDisturb(const vec3 &v, const vec3 &r1) {
 double resonance::calDotDisturb() {
     calTrue();
     vec6 vec = crtbp::elementsToRot({{a, e, I, ome, Ome, f}}, Mj * pi180);
-    return resonance::dotDisturb({{vec[0], vec[1], vec[2]}}, {{1 - mu, 0, 0}});
+    return dotDisturb({{vec[0], vec[1], vec[2]}}, {{1 - mu, 0, 0}});
 }
 
 double resonance::ringDisturb(const vec3 &v, const double ap) {
@@ -92,8 +92,8 @@ double resonance::inteOneCycle() {
     double incr = 360.0 / num * k, disturb = 0;
     for (size_t i = 0; i < num; i++) {
         Mj = incr * i;
-        resonance::calM();
-        disturb += resonance::calDotDisturb();
+        calM();
+        disturb += calDotDisturb();
     }
     // cout << phi << '\t' << a << '\t' << e << '\t' << Mj << '\t' << M << '\t'
     //      << setprecision(10) << disturb << endl;
@@ -105,7 +105,7 @@ double resonance::inteTwoCycle(double phiAmp) {
     size_t numt = num / 4;
     for (size_t i = 0; i < numt; i++) {
         phi = sin((double)i / numt * pi2) * phiAmp + phi_c;
-        disturb += resonance::inteOneCycle();
+        disturb += inteOneCycle();
     }
     phi = phi_c;
     return disturb / num;
@@ -115,16 +115,16 @@ void resonance::averagePhi() {
     ofstream output;
     output.open(GLOBAL_OUTPUT_LOCATION + "SingleAve_" + to_string(N) + "_" +
                 to_string(Min) + "_" + to_string(Max) + ".txt");
-    resonance::displayInfo();
+    displayInfo();
     double dS = (Max - Min) / numY;
     double result;
     for (S = Min; S <= Max + 1e-10; S += dS) {
         cout << "S: " << S << endl;
-        resonance::calAEI();
-        resonance::calH0();
+        calAEI();
+        calH0();
         cout << a << '\t' << e << '\t' << I << '\t' << endl;
         for (phi = -180; phi <= 180; phi += 1) {
-            result = resonance::inteOneCycle() - H0;
+            result = inteOneCycle() - H0;
             output << setprecision(12) << result << endl;
         }
     }
@@ -135,7 +135,7 @@ void resonance::averageOme(double phiAmp) {
     ofstream output;
     output.open(GLOBAL_OUTPUT_LOCATION + "SingleAveOme_" + to_string(N) + "_" +
                 to_string(Max) + ".txt");
-    resonance::displayInfo();
+    displayInfo();
     double dSz = (Max - Min) / numY;
     double result;
     double Sz_c = 2 * sqrt(a) + N;
@@ -143,14 +143,14 @@ void resonance::averageOme(double phiAmp) {
     for (Sz = Min; Sz <= Max + 1e-10; Sz += dSz) {
         cout << "Sz: " << Sz << endl;
         S = 2 * sqrt(a) - (Sz - N);
-        resonance::calAEI();
-        resonance::calH0();
+        calAEI();
+        calH0();
         cout << a << '\t' << e << '\t' << I << '\t' << phi << '\t' << endl;
         for (ome = -180; ome <= 180; ome += 2) {
             if (phiAmp == 0)
-                result = resonance::inteOneCycle() - H0;
+                result = inteOneCycle() - H0;
             else {
-                result = resonance::inteTwoCycle(phiAmp) - H0;
+                result = inteTwoCycle(phiAmp) - H0;
             }
             output << setprecision(12) << result << endl;
         }

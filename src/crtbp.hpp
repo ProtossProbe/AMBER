@@ -38,7 +38,7 @@ const double mu = 0.001;
 const double mu_sun = 1 - mu;
 const double year = 365.25;
 const double muu = mu_sun;
-const size_t MAX_NUMBER = 1000;
+const size_t MAX_NUMBER = 100;
 
 // ouput file location
 const std::string GLOBAL_OUTPUT_LOCATION = "assets/_output/";
@@ -54,7 +54,10 @@ typedef boost::array<double, 7> vec7;
 typedef boost::array<double, 12> vec12;
 
 // orbit3d class
+class crtbp;
 class orbit3d {
+    friend class crtbp;
+
   private:
     double div = 1e-8;
     double megno_temp = 0;
@@ -119,42 +122,56 @@ class orbit3d {
 
     // get & set functions
     // declared and defined in this header file
-    double getTime() { return current_t; }
-    double getTimeYear() { return current_t / pi2; }
-    vec6 getState() {
+    double getTime() const { return current_t; }
+    double getTimeYear() const { return current_t / pi2; }
+    vec6 getState() const {
         return {{vec[0], vec[1], vec[2], vec[3], vec[4], vec[5]}};
     }
-    vec6 getDelta() {
+    vec6 getDelta() const {
         return {{vec[6], vec[7], vec[8], vec[9], vec[10], vec[11]}};
     }
-    vec3 getPos() { return {{vec[0], vec[1], vec[2]}}; }
-    vec3 getVel() { return {{vec[3], vec[4], vec[5]}}; }
-    vec6 getInerState() { return vec_inertial; }
-    vec3 getInerPos() {
+    vec3 getPos() const { return {{vec[0], vec[1], vec[2]}}; }
+    vec3 getVel() const { return {{vec[3], vec[4], vec[5]}}; }
+    vec6 getInerState() const { return vec_inertial; }
+    vec3 getInerPos() const {
         return {{vec_inertial[0], vec_inertial[1], vec_inertial[2]}};
     }
-    vec3 getInerVel() {
+    vec3 getInerVel() const {
         return {{vec_inertial[3], vec_inertial[4], vec_inertial[5]}};
     }
-    std::string getName() { return name; };
-    vec6 getElements() { return ele; };
-    double getJacobi() { return jacobi; };
-    double getJacobiError() { return jacobi_err; };
-    double getMEGNO() { return megno; };
-    double getMEGNOMax() { return megno_max; };
-    void setState(const vec6 &state) {
+    std::string getName() const { return name; };
+    vec6 getElements() const { return ele; };
+    double getJacobi() const { return jacobi; };
+    double getJacobiError() const { return jacobi_err; };
+    double getMEGNO() const { return megno; };
+    double getMEGNOMax() const { return megno_max; };
+    inline orbit3d &setState(const vec6 &state) {
         for (size_t i = 0; i < state.size(); i++)
             vec[i] = state[i];
+        return *this;
     };
-    void setElement(vec6 element) { ele = element; };
-    void setName(std::string newname) { name = newname; };
-    void setDt(double t) { dt = t; };
-    void setOutputFile() {
+    inline orbit3d &setElement(vec6 element) {
+        ele = element;
+        return *this;
+    };
+    inline orbit3d &setName(std::string newname) {
+        name = newname;
+        return *this;
+    };
+    inline orbit3d &setDt(double t) {
+        dt = t;
+        return *this;
+    };
+    inline orbit3d &setOutputFile() {
         std::string location = GLOBAL_OUTPUT_LOCATION + "Ast_" + getName();
         outputfile.open(location + ".txt");
+        return *this;
     };
-    void setTickTime(double tick) { ticktime = tick; }
-    void setInitial(vec6 elements, double dtt, double endt, std::string na);
+    inline orbit3d &setTickTime(double tick) {
+        ticktime = tick;
+        return *this;
+    }
+    orbit3d &setInitial(vec6 elements, double dtt, double endt, std::string na);
     void closeOutputFile() { outputfile.close(); };
 
     // declared here, defined in crtbp.cpp
@@ -191,6 +208,16 @@ static void writePosData(orbit3d &orb) {
                    << std::setw(10) << orb.getMEGNO() << std::endl;
 }
 
+static void writeElemPosData(orbit3d &orb) {
+    orb.outputfile << std::setw(8) << orb.getTimeYear() << '\t';
+    for (double j : orb.getPos())
+        orb.outputfile << std::setw(10) << j << '\t';
+    for (double j : orb.getElements())
+        orb.outputfile << std::setw(10) << j << '\t';
+    orb.outputfile << std::setw(10) << orb.getJacobiError() << '\t'
+                   << std::setw(10) << orb.getMEGNO() << std::endl;
+}
+
 struct observer {
     orbit3d *orb;
     size_t jump;
@@ -205,7 +232,8 @@ struct observer {
         }
         if ((*orb).steps % jump == 0) {
             (*orb).updatePerOutput();
-            writeElemData(*orb);
+            writeElemPosData(*orb);
+            // writeElemData(*orb);
             // writePosData(*orb);
         }
     }
