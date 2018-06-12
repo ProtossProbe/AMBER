@@ -6,3 +6,6 @@ run:
 
 plot:
 	python src/python/_analytical.py
+
+compile:
+	g++-7 -g -fopenmp -std=c++17 -Wall -Wno-unused-variable -Wno-unused-function -Wno-reorder src/crtbp.cpp src/resonance.cpp src/main.cpp -o main

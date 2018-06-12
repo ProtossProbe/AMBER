@@ -78,20 +78,24 @@ print calN(9.6769180 / saturn_a, 0.7623217, 180)
 #     e = cale(N, a)
 #     ax.plot(a, e, color='grey', linestyle="dashed", alpha=0.5)
 
-# N_list = np.array([-2.06, -2.04, -2.03, -2.02, -2.01, -2, -1.99, -1.98, -
-#                    1.95, -1.90, -1.80, -1.60, -1.30])
-# e_min = np.array([0.075, 0.054, 0.042, 0.033, 0.024, 0.017, 0.025, 0.036,
-#                   0.13, 0.316, 0.526, 0.763, 0.94])
-# e_max = np.array([0.14, 0.179, 0.209, 0.243, 0.280, 0.313, 0.345, 0.375,
-#                   0.445, 0.535, 0.666, 0.834, 0.966])
+N_list = np.array([-2.06, -2.04, -2.03, -2.02, -2.01, -2, -1.99, -1.98, -
+                   1.95, -1.90, -1.80, -1.60, -1.30])
+e_min = np.array([0.075, 0.054, 0.042, 0.033, 0.024, 0.017, 0.025, 0.036,
+                  0.13, 0.316, 0.526, 0.763, 0.94])
+e_max = np.array([0.14, 0.179, 0.209, 0.243, 0.280, 0.313, 0.345, 0.375,
+                  0.445, 0.535, 0.666, 0.834, 0.966])
 # N_list = N_list[::-1]
 # e_min = e_min[::-1]
 # e_max = e_max[::-1]
 # # cs = CubicSpline(N_list, e_min)
 
 # # e_min = cs(N)
-# a_min = cala(N_list, e_min)
-# a_max = cala(N_list, e_max)
+a_min = cala(N_list, e_min)
+a_max = cala(N_list, e_max)
+
+print a_min, e_min
+
+print a_max, e_max
 # ax.plot(a_min, e_min, linewidth=3)
 # ax.plot(a_max, e_max, linewidth=3)
 
@@ -126,6 +130,6 @@ print calN(9.6769180 / saturn_a, 0.7623217, 180)
 # print calAEI(-1.94, 1.004, 0.0033)
 # for e in np.arange(0.17, 0.19, 0.001):
 
-for delta in np.arange(0, 360, 10):
-    print 1, 0.5, 90, 0, 0, delta
+# for delta in np.arange(0, 360, 10):
+#     print 1, 0.5, 90, 0, 0, delta
 # fig.savefig('N=-2.02.pdf', dpi=500, transparent=True)

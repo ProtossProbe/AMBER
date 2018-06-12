@@ -5,14 +5,14 @@ import scipy.interpolate as interpolate
 from scipy.integrate import odeint, ode
 
 
-LOCATION = "assets/_output/"
+LOCATION = "assets/old/1206/planar/"
 index = 2
 
 
-target = LOCATION + "SingleAve_-1.913000_0.040000_0.140000.txt"
-N = -1.913
-S_min = 0.04
-S_max = 0.14
+target = LOCATION + "SingleAve_-1.96_0.08.txt"
+N = -1.96
+S_min = 0
+S_max = 0.08
 n = 721
 data = np.loadtxt(target)
 num = data.shape[0]
@@ -70,6 +70,7 @@ def hamiltonian(y, t):
     dx1 = Hy
     dx2 = -Hx
     return [dx1, dx2]
+
 
 # x = np.linspace(-150, 150, 100)
 # y = []

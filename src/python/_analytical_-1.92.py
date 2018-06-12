@@ -10,18 +10,21 @@ mu = 0.001
 mu_s = 1 - mu
 
 
-LOCATION = "assets/_output/"
+LOCATION = "assets/old/1206/planar/"
 index = 2
 
 
 # a = 1.05
 
 
-target = LOCATION + "SingleAveOme_-1.835000_0.050000.txt"
-N = -2.378
-S_min = 0.00
-S_max = 0.05
-n = 181
+NAME = "SingleAve_-1.96_0.08"
+target = LOCATION + NAME + ".txt"
+words = NAME.split("_")
+N = float(words[1])
+S_min = 0
+S_max = float(words[2])
+print N, S_min, S_max
+n = 721
 # target = LOCATION + "Ast_" + str(index) + ".txt"
 # target2 = LOCATION + "A_" + str(index) + ".txt"
 # data2 = np.loadtxt(target2, skiprows=4)
@@ -36,31 +39,32 @@ data = np.loadtxt(target)
 m = data.shape[0] / n
 print n, m
 # x = np.linspace(-180, 180, n)
-x = np.linspace(-180, 180, n) / 180.0 * np.pi
+x = np.linspace(0, 360, n) / 180.0 * np.pi
 y = np.linspace(S_min, S_max, m)
-# e = ut.NStoAE(N, y)[1]
+# y = np.sqrt(2*y)
+y = ut.NStoAE(N, y)[1]
 X, Y = np.meshgrid(x, y)
 Z = data
 Z = Z.reshape(m, n)
 Z = np.nan_to_num(Z)
 Zmax = np.max(Z)
 Zmin = np.min(Z)
-level = np.linspace(Zmin, Zmin + 0.000002, 10)
+# level = np.linspace(Zmin, Zmin + 0.0002, 10)
 # level = np.insert(level, 1, Zmin + 0.000005)
 # level = np.hstack((level, Zmin + 0.00047))
 
-level2 = np.linspace(Zmin, Zmin + 0.000005, 30)
+level2 = np.linspace(Zmin, Zmin + 0.002, 40)
 # level2 = np.linspace(Zmax - 0.010, Zmax, 30)
 # level2 = np.hstack((level2, Zmin + 0.0037))
 
 fig1, ax1 = plt.subplots()
 fig2, ax2 = plt.subplots(subplot_kw=dict(projection='polar'))
-ax2.set_ylim(0, 0.05)
+# ax2.set_ylim(0, 0.008)
 # fig2, ax2 = plt.subplots()
-ax2.contour(X, Y, Z, level, colors='black', linewidths=1, alpha=0.25)
-cmap = plt.get_cmap('magma_r')
-ax1.contourf(X, Y, Z, level2, cmap=cmap)
-ax2.contourf(X, Y, Z, level2, cmap=cmap)
+# ax2.contour(X, Y, Z, level, colors='black', linewidths=1, alpha=0.25)
+# cmap = plt.get_cmap("gist_rainbow")
+ax1.contour(X, Y, Z, level2)
+ax2.contour(X, Y, Z, level2)
 ax2.grid(color='black', linestyle='dotted', alpha=0.2, linewidth=1)
 ax2.grid(True)
 # ax.yaxis.set_ticks(np.arange(0.05, 0.25, 0.05))

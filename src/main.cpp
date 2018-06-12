@@ -13,20 +13,25 @@ using namespace boost::math;
 using namespace boost::numeric::odeint;
 using namespace ProbeUtility;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     string switchstring(argv[3]);
     ifstream switchfile;
     switchfile.open(switchstring);
 
     size_t k, kj;
-    double N, Sz, Max, Min, a;
+    bool isPrograde;
+    double N, Sz, Max, Min, a, iMax;
     int phi, phiAmp;
     size_t numY, num;
     char swi;
+    string planets;
     crtbp inte_system;
     switchfile >> swi;
-    switch (swi) {
-    case '1': {
+    switch (swi)
+    {
+    case '1':
+    {
         cout << "Execute Programm 1: Numerical Integration" << endl;
         string inputstring(argv[1]);
         string infostring(argv[2]);
@@ -39,7 +44,8 @@ int main(int argc, char *argv[]) {
         int jump = info[2];
 
         orbit3d *orbits = new orbit3d[MAX_NUMBER];
-        for (size_t i = 0; i < number; i++) {
+        for (size_t i = 0; i < number; i++)
+        {
             orbits[i].setInitial(input[i], dt, endt, to_string(i + 1));
         }
         double start = omp_get_wtime();
@@ -48,10 +54,12 @@ int main(int argc, char *argv[]) {
         break;
     }
 
-    case '2': {
+    case '2':
+    {
         cout << "Execute Programm 2: Generate Single Averaged Hamiltonian"
              << endl
              << endl;
+        switchfile >> isPrograde;
         switchfile >> kj;
         switchfile >> k;
         switchfile >> N;
@@ -61,31 +69,17 @@ int main(int argc, char *argv[]) {
         switchfile >> numY;
         switchfile >> num;
         cout << "N constant is: " << N << endl;
-        cout << "Sz is: " << Sz << endl << endl;
-        resonance aver_system(k, kj, N, Sz, Min, Max, numY, num);
+        cout << "Sz is: " << Sz << endl
+             << endl;
+        resonance aver_system(isPrograde, k, kj, N, Sz, Min, Max, numY, num);
         aver_system.averagePhi();
         break;
     }
-    case '3': {
-        cout << "Execute Programm 3: Generate Single Averaged omega Hamiltonian"
+    case '3':
+    {
+        cout << "Execute Programm 3: Generate omega Hamiltonian inside MMR"
              << endl;
-        switchfile >> kj;
-        switchfile >> k;
-        switchfile >> N;
-        switchfile >> a;
-        switchfile >> phi;
-        switchfile >> Max;
-        switchfile >> numY;
-        switchfile >> num;
-        cout << "N constant is: " << N << endl;
-        cout << "a is: " << a << endl << endl;
-        resonance aver_system(k, kj, N, a, phi, Max, numY, num);
-        aver_system.averageOme(0);
-        break;
-    }
-    case '4': {
-        cout << "Execute Programm 4: Generate Double Averaged omega Hamiltonian"
-             << endl;
+        switchfile >> isPrograde;
         switchfile >> kj;
         switchfile >> k;
         switchfile >> N;
@@ -96,9 +90,23 @@ int main(int argc, char *argv[]) {
         switchfile >> numY;
         switchfile >> num;
         cout << "N constant is: " << N << endl;
-        cout << "a is: " << a << endl << endl;
-        resonance aver_system(k, kj, N, a, phi, Max, numY, num);
+        cout << "a is: " << a << endl
+             << endl;
+        resonance aver_system(isPrograde, k, kj, N, a, phi, Max, numY, num);
         aver_system.averageOme(phiAmp);
+        break;
+    }
+    case '4':
+    {
+        cout << "Execute Programm 4: Generate omega Hamiltonian outside MMR"
+             << endl;
+        switchfile >> iMax;
+        switchfile >> a;
+        switchfile >> planets;
+        switchfile >> numY;
+        switchfile >> num;
+        resonance aver_system(iMax, a, numY, num);
+        aver_system.averageOmeRing(planets);
         break;
     }
         switchfile.close();

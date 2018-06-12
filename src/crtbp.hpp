@@ -34,8 +34,35 @@ const double pi_180 = 180 / pi;
  *      muu - 1 - mu;
  *      MAX_NUMBER - max number of particles can be handle in this program;
 */
-const double mu = 0.001;
+
+const size_t PLANET_INDEX = 3;
+
+const double mu_y = 1.66013679527193009e-7;
+const double mu_v = 2.44783833966454430e-6;
+const double mu_e = 3.04043264264672381e-6;
+const double mu_m = 3.22715144505386530e-7;
+const double mu_j = 9.54791938424326609e-4;
+const double mu_s = 2.85885980666130812e-4;
+const double mu_u = 4.36624404335156298e-5;
+const double mu_n = 5.15138902046611451e-5;
+
+const double mu_group[] = {mu_y, mu_v, mu_e, mu_m, mu_j, mu_s, mu_u, mu_n};
+
+const double d_y = 0.387;
+const double d_v = 0.723;
+const double d_e = 1;
+const double d_m = 1.52;
+const double d_j = 5.20;
+const double d_s = 9.58;
+const double d_u = 19.20;
+const double d_n = 30.05;
+
+const double d_group[] = {d_y, d_v, d_e, d_m, d_j, d_s, d_u, d_n};
+
+const double mu = mu_group[PLANET_INDEX-1];
+const double PLANET_DISTANCE = d_group[PLANET_INDEX-1];
 const double mu_sun = 1 - mu;
+
 const double year = 365.25;
 const double muu = mu_sun;
 const size_t MAX_NUMBER = 100;
